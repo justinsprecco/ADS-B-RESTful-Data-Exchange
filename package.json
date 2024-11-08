@@ -19,6 +19,7 @@
     "express-http-proxy": "^2.0.0",
     "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.8.1",
     "node": "^21.1.0",
     "pg": "^8.11.3",
     "pg-promise": "^11.5.4",
