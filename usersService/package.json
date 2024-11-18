@@ -1,0 +1,20 @@
+{
+  "name": "ads-b-restful-data-exchange-user",
+  "version": "1.0.0",
+  "description": "User service for ADSB RESTful Data Exchange",
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "eslint . --fix",
+    "test": "jest"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "http": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
+    "pg-promise": "^11.10.2"
+  }
+}
