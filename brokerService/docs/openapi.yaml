@@ -1,0 +1,7 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: ADS-B RESTful Data Exchange Broker API
+  description: API documentation for the ADS-B RESTful Data Exchange Broker Service
+servers:
+  - url: http://localhost:3000
