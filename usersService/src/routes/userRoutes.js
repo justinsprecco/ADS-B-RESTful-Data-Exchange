@@ -2,7 +2,7 @@
  * @swagger
  * tags:
  *   name: Users
- *   description: User management and authentication
+ *   description: User management
  */
 
 const express = require("express")
