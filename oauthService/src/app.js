@@ -1,4 +1,5 @@
 const express = require("express")
+const morgan = require("morgan")
 const {
    corsMiddleware,
    errorHandler,
@@ -6,6 +7,7 @@ const {
    notFoundHandler,
 } = require("./middleware")
 const routes = require("./routes")
+const { NODE_ENV } = require("./config")
 
 const app = express()
 
@@ -14,7 +16,7 @@ app.use(corsMiddleware)
 app.use(express.json())
 
 // Logging Middleware
-app.use(requestLogger)
+app.use(morgan(NODE_ENV === "development" ? "dev" : "combined"))
 
 // Route Setup
 app.use("/auth", routes)
