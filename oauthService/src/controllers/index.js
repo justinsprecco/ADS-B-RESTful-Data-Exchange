@@ -4,7 +4,7 @@
 */
 
 const { sign, verify } = require("jsonwebtoken")
-const { AUTH_CODE_SECRET, AUTH_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = require("../config.js")
+const { AUTH_CODE_SECRET, AUTH_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = require("../config")
 
 /*
   This function generates the authentication code
