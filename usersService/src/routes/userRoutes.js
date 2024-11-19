@@ -68,29 +68,6 @@ const {
  *             example:
  *               message: "Error: User registration failed"
  */
-/**
- * @swagger
- * /users:
- *   post:
- *     summary: Create a new user
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       201:
- *         description: User created successfully
- *       500:
- *         description: Server error
- */
 router.post("/", postUser)
 
 router.post('/validate', verifyUser, validateUser)
