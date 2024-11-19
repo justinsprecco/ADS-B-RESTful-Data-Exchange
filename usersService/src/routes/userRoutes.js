@@ -18,9 +18,9 @@ router.post("/", postUser)
 
 router.post('/validate', verifyUser, validateUser)
 
-router.get("/:id", verifyTokens, getUser)
+router.get("/:id", verifyAccessToken, getUser)
 
-router.delete("/:id", verifyTokens, deleteUser)
+router.delete("/:id", verifyAccessToken, deleteUser)
 
 router.put("/:id", updateUser)
 

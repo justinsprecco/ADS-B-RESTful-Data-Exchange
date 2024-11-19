@@ -8,7 +8,6 @@ const {
 } = require("./middleware")
 const userRoutes = require("./routes/userRoutes")
 const deviceRoutes = require("./routes/deviceRoutes")
-const authRoutes = require("./routes/authRoutes")
 const { NODE_ENV } = require("./config")
 
 const app = express()
@@ -23,7 +22,6 @@ app.use(morgan(NODE_ENV === "development" ? "dev" : "combined"))
 // Route Setup
 app.use("/users", userRoutes)
 app.use("/users", deviceRoutes)
-app.use(authRoutes)
 
 // Error Handling Middleware
 app.use(errorHandler)
