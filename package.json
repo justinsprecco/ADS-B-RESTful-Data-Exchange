@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Sagetech Capstone Project",
   "scripts": {
+    "dev": "concurrently \"npm run dev --prefix brokerService\" \"npm run dev --prefix userService\" \"npm run dev --prefix oauthService\"",
     "lint": "eslint . --fix",
     "test": "jest"
   },
@@ -10,6 +11,7 @@
   "license": "ISC",
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^2.10.0",
+    "concurrently": "^9.1.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.7"
   }
