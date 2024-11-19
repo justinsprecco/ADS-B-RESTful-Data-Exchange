@@ -5,13 +5,13 @@ const swaggerOptions = {
    definition: {
       openapi: "3.0.0",
       info: {
-         title: "ADS-B RESTful Data Exchange User API",
+         title: "ADS-B RESTful Data Exchange Broker API",
          version: "1.0.0",
-         description: "API documentation for the ADS-B RESTful Data Exchange User Service",
+         description: "API documentation for the ADS-B RESTful Data Exchange Broker Service",
       },
       servers: [
          {
-            url: "http://localhost:3001",
+            url: "http://localhost:3000",
          },
       ],
    },

@@ -8,12 +8,16 @@ const {
 } = require("./middleware")
 const routes = require("./routes")
 const { NODE_ENV } = require("./config")
+const { swaggerUi, swaggerDocs } = require("./config/swaggerConfig")
 
 const app = express()
 
 // Middleware Setup
 app.use(corsMiddleware)
 app.use(express.json())
+
+// Swagger Middleware
+app.use("/api", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
 // Logging Middleware
 app.use(morgan(NODE_ENV === "development" ? "dev" : "combined"))
