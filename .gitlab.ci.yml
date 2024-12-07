@@ -1,0 +1,31 @@
+# TODO: Add deployment stage
+
+stages:
+  - build
+  - test
+
+cache:
+  paths:
+    - brokerService/node_modules/
+    - oauthService/node_modules/
+    - usersService/node_modules/
+
+build:
+  stage: build
+  image: node:20.11.1
+  script:
+    - echo "Building Docker images"
+    - docker build -t adsb-restful-data-exchange .
+  only:
+    - main
+
+test:
+  stage: test
+  image: node:20.11.1
+  script:
+    - echo "Running tests"
+    - npm run install-all
+    - npm test
+  only:
+    - merge_requests
+    - main

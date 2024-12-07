@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix brokerService\" \"npm run dev --prefix usersService\" \"npm run dev --prefix oauthService\"",
     "lint": "eslint . --fix",
-    "test": "jest"
+    "test": "jest",
+    "install-all": "concurrently \"npm install --prefix brokerService\" \"npm install --prefix usersService\" \"npm install --prefix oauthService\""
   },
   "author": "",
   "license": "ISC",
