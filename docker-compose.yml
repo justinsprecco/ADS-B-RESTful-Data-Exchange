@@ -3,21 +3,46 @@ version: "3.8"
 services:
   broker-service:
     build: ./brokerService
+    restart: unless-stopped
     ports:
       - 3000:3000
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - USER_SOCKET_PORT=3003
-      - ADSDB_USER="user"
-      - ADSDB_HOST="postgres"
-      - ADSDB_DB="database"
-      - ADSDB_PASSWORD="password"
-      - ADSDB_PORT=5432
+    env_file:
+      - ./brokerService/dev.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  user-service:
+    build: ./usersService
+    restart: unless-stopped
+    ports:
+      - 3001:3001
+    env_file:
+      - ./usersService/dev.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  oauth-service:
+    build: ./oauthService
+    restart: unless-stopped
+    ports:
+      - 3002:3002
+    env_file:
+      - ./oauthService/dev.env
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:latest
     hostname: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d database"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
