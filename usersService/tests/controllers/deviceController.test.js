@@ -4,6 +4,15 @@ const Device = require("../../src/models/Device")
 
 // Mock device model
 jest.mock("../../src/models/Device")
+jest.mock('../../src/database/db', () => ({
+   db: {
+      connect: jest.fn(),
+      any: jest.fn(),
+      none: jest.fn(),
+   },
+   dbConnect: jest.fn(),
+   dbDisconnect: jest.fn(),
+}))
 
 beforeEach(() => 
 {
