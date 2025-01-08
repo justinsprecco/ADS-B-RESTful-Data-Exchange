@@ -1,4 +1,9 @@
-const express = require('express')
+const express = require("express")
+const path = require('path')
+const morgan = require("morgan")
+const swaggerUi = require("swagger-ui-express")
+const { readFileSync } = require("fs")
+const { parse } = require('yaml')
 const {
    corsMiddleware,
    errorHandler,
@@ -7,7 +12,8 @@ const {
 } = require("./middleware")
 const userRoutes = require("./routes/userRoutes")
 const deviceRoutes = require("./routes/deviceRoutes")
-const authRoutes = require("./routes/authRoutes")
+const { NODE_ENV } = require("./config")
+const apiDoc = readFileSync(path.join(__dirname, "../docs/openapi.yaml"), 'utf8')
 
 const app = express()
 
@@ -15,13 +21,15 @@ const app = express()
 app.use(corsMiddleware)
 app.use(express.json())
 
+// Swagger Middleware
+app.use("/api", swaggerUi.serve, swaggerUi.setup(parse(apiDoc)))
+
 // Logging Middleware
-app.use(requestLogger)
+app.use(morgan(NODE_ENV === "development" ? "dev" : "combined"))
 
 // Route Setup
 app.use("/users", userRoutes)
 app.use("/users", deviceRoutes)
-app.use(authRoutes)
 
 // Error Handling Middleware
 app.use(errorHandler)

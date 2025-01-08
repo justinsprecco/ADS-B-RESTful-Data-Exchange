@@ -9,13 +9,6 @@ function errorHandler(err, req, res, next)
    res.status(500).send("Something went wrong!")
 }
 
-// Middleware for logging request details
-function requestLogger(req, res, next) 
-{
-   console.log(`Received ${req.method} request for ${req.url} from ${req.ip}`)
-   next()
-}
-
 // 404 catch-all handler for handling undefined routes
 function notFoundHandler(req, res) 
 {
@@ -28,6 +21,5 @@ module.exports = {
    ...validationMiddleware,
    corsMiddleware: cors(),
    errorHandler,
-   requestLogger,
    notFoundHandler,
 }

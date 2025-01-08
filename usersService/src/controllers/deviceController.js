@@ -11,7 +11,7 @@ exports.postDevice = async (req, res) =>
 
       // NOTE: should get macAddress / identifier from somewhere else???
 
-      const device = await Device.postDevice
+      const device = await Device.postDevice(macAddress, latitude, longitude)
 
       return res.status(201).json({ message: `Device ${macAddress} added with id ${device.id} and associated with user ${id}` })
    }

@@ -1,0 +1,140 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: ADS-B RESTful Data Exchange User API
+  description: API documentation for the ADS-B RESTful Data Exchange User Service
+servers:
+  - url: http://localhost:3001
+tags:
+ - name: User
+   description: User management
+ - name: Device
+   description: Device management
+
+
+paths:
+  /users:
+    post:
+      tags:
+        - User
+      summary: Create a new user
+      description: Registers a new user and returns the created user ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        201:
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "User added with ID: 1"
+        500:
+          description: Error during user registration.
+
+
+  /users/validate:
+    post:
+      tags:
+        - User
+      summary: Verify a User
+      description: Checks for the given username and password, validating for login.
+      operationId: validateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: User verified successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: User credentials validated successfully
+        400:
+          description: Missing properties.
+        401:
+          description: Wrong username or password.
+        500:
+          description: Error during validation.
+
+
+  /users/{id}/devices:
+    post:
+      tags:
+        - Devices
+      summary: Add a new device
+      description: Registers a new device and returns the created device ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the user
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        201:
+          description: Device added successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Device 01:a2:b3:c4:d5:e6 added with id 1 and associated with user 1"
+        500:
+          description: Error during device registration.
+
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          example: testUser
+          description: The username for the user.
+        password:
+          type: string
+          example: password
+          description: The password for the user.
+    Device:
+      type: object
+      properties:
+        macAddress:
+          type: string
+          example: 01:a2:b3:c4:d5:e6
+          description: The mac address of the device.
+        latitude:
+          type: float
+          example: 38.8951
+          description: The latitude where the device is located.
+        longitude:
+          type: float
+          example: -77.0364
+          description: The longitude where the device is located.

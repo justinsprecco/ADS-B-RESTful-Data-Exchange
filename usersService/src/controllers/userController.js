@@ -1,5 +1,4 @@
 const User = require("../models/User.js")
-const { getAuthCode } = require("../services/authService")
 const { post } = require("axios")
 
 // post "/users"
