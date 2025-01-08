@@ -1,4 +1,5 @@
 # TODO: Add deployment stage
+image: node:20.11.1
 
 stages:
   - build
