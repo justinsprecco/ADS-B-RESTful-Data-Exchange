@@ -13,11 +13,11 @@ touchAndGo specifically contain the total number of "touch and go" for a
 user.
 */
 const userSchema = new Schema(
-{
-	_id: {type: Number, uniquer: true},
-	numLandings: Number,
-	touchAndGo: Number
-}
+   {
+      _id: {type: Number, uniquer: true},
+      numLandings: Number,
+      touchAndGo: Number
+   }
 )
 
 /*
@@ -28,12 +28,12 @@ A timestamp is given to the message so that it can be determined if the
 message is over a week old and needs to be purged.
 */ 
 const messageADSBSchema = new Schema(
-{
-	_id: {type: Number, unique: true},
-	data: String,
-	timestamp: { type: Date, default: Date.now },
-	groundstationID: Number
-})
+   {
+      _id: {type: Number, unique: true},
+      data: String,
+      timestamp: { type: Date, default: Date.now },
+      groundstationID: Number
+   })
 
 /*
 The message Radar schema stores the message contents along with the 
@@ -43,12 +43,12 @@ A timestamp is given to the message so that it can be determined if the
 message is over a week old and needs to be purged.
 */ 
 const messageRadarSchema = new Schema(
-{
-	_id: {type: Number, unique: true},
-	data: String,
-	timestamp: { type: Date, default: Date.now },
-	groundstationID: Number
-})
+   {
+      _id: {type: Number, unique: true},
+      data: String,
+      timestamp: { type: Date, default: Date.now },
+      groundstationID: Number
+   })
 
 /*
 Groundstation schema relies on the client to have its _id field match up
@@ -62,10 +62,10 @@ A user can have many groundstations but a groundstation can only have one
 user.
 */
 const groundstationSchema = new Schema(
-{
-	_id: {type: Number, unique: true},
-	macAddress: {type: String, unique: true},
-	latitude: Number,
-	longitude: Number,
-	userID: Number
-})
+   {
+      _id: {type: Number, unique: true},
+      macAddress: {type: String, unique: true},
+      latitude: Number,
+      longitude: Number,
+      userID: Number
+   })

@@ -1,7 +1,7 @@
 const http = require("http")
 const app = require("./app")
 const { PORT } = require("./config")
-const { dbConnect, dbDisconnect } = require("./database/db")
+const { dbConnect } = require("./database/db")
 const { openSocketConnections, closeSocketConnections } = require("./services/socketService")
 
 // HTTP Server
@@ -24,7 +24,6 @@ const shutdown = async () =>
    server.close()
    console.log("HTTP server closed.")
 
-   dbDisconnect()
    process.exit(0)
 }
 
