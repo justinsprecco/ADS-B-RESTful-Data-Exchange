@@ -11,9 +11,9 @@ exports.postDevice = async (req, res) =>
 
       // NOTE: should get macAddress / identifier from somewhere else???
 
-      const device = await Device.postDevice(macAddress, latitude, longitude)
+      const device = await Device.create(macAddress, latitude, longitude)
 
-      return res.status(201).json({ message: `Device ${macAddress} added with id ${device.id} and associated with user ${id}` })
+      return res.status(201).json({ message: `Device ${macAddress} added with id ${device._id} and associated with user ${id}` })
    }
    catch (err)
    {
@@ -30,7 +30,7 @@ exports.getDevices = async (req, res) =>
    {
       const userId = parseInt(req.params.id)
 
-      const devices = await Device.getDevices(userId)
+      const devices = await Device.getByUserId(userId)
 
       return res.status(200).json({ message: devices })
    }
@@ -46,10 +46,9 @@ exports.getDevice = async (req, res) =>
 {
    try
    {
-      const userId = parseInt(req.params.id)
       const deviceid = parseInt(req.params.deviceid)
 
-      const device = await Device.getDevice(userId, deviceId)
+      const device = await Device.getById(deviceId)
 
       return res.status(200).json({ message: device })
    }
@@ -65,10 +64,9 @@ exports.deleteDevice = async (req, res) =>
 {
    try
    {
-      const userId = parseInt(req.params.id)
       const deviceid = parseInt(req.params.deviceid)
 
-      await Device.deleteDevice(userId, deviceId)
+      await Device.delete(deviceId)
 
       return res.status(200).json({ message: `device ${deviceid} deleted.` })
    }
@@ -84,13 +82,12 @@ exports.updateDevice = async (req, res) =>
 {
    try
    {
-      const userId = parseInt(req.params.id)
       const deviceid = parseInt(req.params.deviceid)
       const { latitude, longitude } = req.body
 
-      const results = await Device.updateDevice(userId, deviceId, latitude, longitude)
+      const device = await Device.update(deviceId, latitude, longitude)
 
-      if (!results)
+      if (!device)
       {
          return res.status(402).json({ message: "Include latitude or longitude in body to update" })
       }

@@ -1,131 +1,99 @@
-const crypto = require('crypto')
-const { db } = require("../database/db")
+const { Schema, model } = require("mongoose")
+const { hash, compare } = require("bcryptjs")
 
-exports.postUser = async (username, password) => 
-{
-   const salt = crypto.randomBytes(32).toString('hex')
-   const hash = crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString("hex")
+/*
+The user schema contains the id of a user and the number of 
+landings/touchandgo during its entire lifetime for all of its groundstations.
 
-   const query = {
-      text: "INSERT INTO users (username, password, salt) VALUES ($1, $2, $3) RETURNING *",
-      values: [username, hash, salt]
-   }
+numLandings contain the total number of landings (not including touch and go)
+for a user.
 
-   const results = await db.query(query)
-   return results[0]
-
-   // TODO: add code that checks if user already exists!
-
-}
-
-exports.validateUser = async (username, password) => 
-{
-   const salt = await getSalt(username)
-   if (!salt)
+touchAndGo specifically contain the total number of "touch and go" for a
+user.
+*/
+const userSchema = new Schema(
    {
-      throw new Error('User not found in the system.')
+      username:
+    {
+       type: String,
+       required: true
+    },
+      password:
+    {
+       type: String,
+       required: true
+    },
+      numLandings: Number,
+      touchAndGo: Number
    }
+)
 
-   const hash = crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString("hex")
-
-   const query = {
-      text: "SELECT id FROM users WHERE username=$1 AND password=$2",
-      values: [username, hash]
+userSchema.pre("save", async function(next)
+{
+   const user = this
+   if (user.isModified("password")) 
+   {
+      const hashedPassword = await hash(this.password, 8)
+      user.password = hashedPassword
    }
+   next()
+})
 
-   const results = await db.query(query)
-   const user = results[0]
+userSchema.statics.create = async function(username, password)
+{
+   const existingUser = await this.findOne({ username })
+   if (existingUser) throw new Error("Username already exists")
 
-   if (!user) throw new Error("Invalid Password.")
-
-   return user
+   const newUser = new this({ username, password })
+   await newUser.save()
+   return { userId: newUser._id }
 }
 
-const getSalt = async(username) => 
+userSchema.statics.validate = async function(username, password)
 {
+   const user = await this.findOne({ username })
+   if (!user) throw new Error("User not found")
 
-   const query = {
-      text: "SELECT salt from users WHERE username=$1",
-      values: [username]
-   }
+   const isMatch = await compare(password, user.password)
+   if (!isMatch) throw new Error("Invalid password")
 
-   const results = await db.query(query)
-
-   return results[0].salt
+   return { userId: user._id }
 }
 
-exports.getUser = async (userId) =>
+userSchema.statics.getById = async function(userId)
 {
-   const query = {
-      text: 'SELECT username FROM users WHERE id = $1',
-      values: [userId]
-   }
-
-   const results = await db.query(query)
-   const user = results[0]
-
-   if (!user) throw new Error("User doesn't exist.")
-
-   return user
+   const user = await this.findById(userId)
+   if (!user) throw new Error("User not found")
+   return { user }
 }
 
-exports.getUsers = async () => 
+userSchema.statics.getAll = async function()
 {
-   const query = "SELECT username FROM users ORDER BY id ASC"
-   const results = await db.query(query)
-   if (!results) throw new Error("Users could not be retrieved!")
+   const users = this.find({})
+   return { users }
    return results
 }
 
-// delete '/users/:id'
-// delete user given user id
-exports.deleteUser = async (userId) =>
+userSchema.statics.delete = async function(userId)
 {
-   const query = {
-      text: 'DELETE FROM users WHERE id = $1',
-      values: [userId]
-   }
+   const user = await this.findByIdAndDelete(userId)
+   if (!user) throw new Error("User not found")
 
-   const results = db.query(query)
-   if (!results) throw new Error("Unable to delete user.")
+   return { user }
 }
 
-// put '/users/:id'
-// update user given user id
-exports.updateUser = async (userId, username, password) =>
+userSchema.statics.update = async function(userId, username, password)
 {
+   const updates = {}
+   if (username !== undefined) updates.username = username
+   if(password !== undefined) updates.password = password
 
-   const salt = crypto.randomBytes(32).toString('hex')
-   const hash = crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString("hex")
+   const user = await this.findByIdAndUpdate(userId, updates)
+   if (!user) throw new Error("User not found")
 
-   const queries = [
-      {
-         text: "UPDATE users SET username=$2, password=$3, salt=$4 WHERE id = $1",
-         values: [id, username, hash, salt]
-      },
-      {
-         text: "UPDATE users SET username=$2 WHERE id = $1",
-         values: [id, username]
-      },
-      {
-         text: "UPDATE users SET password=$2, salt=$3 WHERE id = $1",
-         values: [id, hash, salt]
-      }
-   ]
-
-   let results = null
-   if (username && password)
-   {
-      results = await db.query(queries[0])
-   }
-   else if (username)
-   {
-      results = await db.query(queries[1])
-   }
-   else if (password)
-   {
-      results = await db.query(queries[2])
-   }
-
-   return results
+   return { user }
 }
+
+const User = model("User", userSchema)
+
+module.exports = User

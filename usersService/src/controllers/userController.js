@@ -9,9 +9,9 @@ exports.postUser = async (req, res) =>
 
    try
    {
-      const user = await User.postUser(username, password)
+      const { userId } = await User.create(username, password)
 
-      return res.status(201).json({ message: `User added with ID: ${user.id}` })
+      return res.status(201).json({ message: `User added with ID: ${userId}` })
    }
    catch (err) 
    {
@@ -27,8 +27,8 @@ exports.validateUser = async (req, res) =>
 
    try
    {
-      const user = await User.validateUser(username, password)
-      if (!user) 
+      const { userId } = await User.validate(username, password)
+      if (!userId) 
       {
          return res.status(401).json({ message: "Invalid username or password" })
       }
@@ -47,7 +47,7 @@ exports.getUsers = async (req, res) =>
 {
    try
    {
-      const users = await User.getUsers()
+      const { users } = await User.getAll()
       return res.status(200).json(users)
    }
    catch (err)
@@ -64,7 +64,7 @@ exports.getUser = async (req, res) =>
    {
       const id = parseInt(req.params.id)
 
-      const user = await User.getUser(id)
+      const { user } = await User.getById(id)
 
       return res.status(200).json(user)
    }
@@ -83,7 +83,7 @@ exports.deleteUser = async (req, res) =>
    {
       const id = parseInt(req.params.id)
 
-      await User.deleteUser(id)
+      await User.delete(id)
 
       return res.status(200).json({ message: `user ${id} deleted.` })
    }
@@ -102,9 +102,9 @@ exports.updateUser = async (req, res) =>
       const id = parseInt(req.params.id)
       const { username, password } = req.body
 
-      const results = await User.updateUser(id, username, password)
+      const { user } = await User.update(id, username, password)
 
-      if (!results) 
+      if (!user) 
       {
          return res.status(402).json({ message: "Include username or password in body to update" })
       }

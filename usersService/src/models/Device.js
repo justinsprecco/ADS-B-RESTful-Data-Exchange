@@ -1,78 +1,81 @@
-const { db } = require("../database/db")
+const { Schema, model } = require("mongoose")
 
-exports.postDevice = async (userId, macAddress, latitude, longitude) =>
-{
-   const query = {
-      text: "INSERT INTO groundstations (userId, macAddress, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *",
-      values: [id, macAddress, latitude, longitude]
-   }
+/*
+Groundstation schema relies on the client to have its _id field match up
+with the groundstationID key from the messageADBSSchema and 
+messageRadarSchema.
 
-   const results = await db.query(query)
-   return results[0]
-}
+Groundstation schema also relies on the client to have its userID field
+match up with userSchema's _id field.
 
-exports.getDevices = async (userId) =>
-{
-   const query = {
-      text: 'SELECT macAddress, latitude, longitude FROM groundstations WHERE userId = $1',
-      values: [userId]
-   }
-
-   const results = await db.query(query)
-   return results
-}
-
-exports.getDevice = async (userId, deviceId) =>
-{
-   const query = {
-      text: 'SELECT macAddress, latitude, longitude FROM groundstations WHERE userId = $1 AND id = $2',
-      values: [userId, deviceid]
-   }
-
-   const results = await db.query(query)
-   return results[0]
-}
-
-exports.deleteDevice = async (deviceId) =>
-{
-   const query = {
-      text: 'DELETE FROM groundstations WHERE userId = $1 AND id = $2',
-      values: [userId, deviceid]
-   }
-
-   const results = await db.query(query)
-
-   // TODO: check results
-}
-
-exports.updateDevice = async (userId, deviceId, latitude, longitude) =>
-{
-   const queries = [
-      {
-         text: 'UPDATE groundstations SET latitude = $3, longitude = $4 WHERE userId = $1 AND id = $2',
-         values: [userId, deviceid, latitude, longitude]
-      }, {
-         text: 'UPDATE groundstations SET latitude = $3 WHERE userId = $1 AND id = $2',
-         values: [userId, deviceid, latitude]
-      }, {
-         text: 'UPDATE groundstations SET longitude = $3 WHERE userId = $1 AND id = $2',
-         values: [userId, deviceid, longitude]
+A user can have many groundstations but a groundstation can only have one
+user.
+*/
+const groundstationSchema = new Schema(
+   {
+      macAddress: 
+    {
+       type: String,
+       unique: true,
+       required: true
+    },
+      latitude: {
+         type: Number,
+         required: true
+      },
+      longitude: {
+         type: Number,
+         required: true
+      },
+      userID: {
+         type: Number,
+         required: true
       }
-   ]
+   })
 
-   let results = null
-   if (latitude && longitude)
-   {
-      results = await db.query(queries[0])
-   }
-   else if (latitude)
-   {
-      results = await db.query(queries[1])
-   }
-   else if (longitude)
-   {
-      results = await db.query(queries[2])
-   }
+groundstationSchema.statics.create = async function(userId, macAddress, latitude, longitude)
+{
+   const existingDevice = await this.findOne({ macAddress })
+   if (existingDevice) throw new Error("Device already exists")
 
-   return results
+   const device = new this({ userId, macAddress, latitude, longitude })
+   await device.save()
+
+   return { device }
 }
+
+groundstationSchema.statics.getByUserId = async function(userId)
+{
+   const devices = await this.find({ userId })
+   return { devices }
+}
+
+groundstationSchema.statics.getById = async function(userId, deviceId)
+{
+   const device = await this.findById(deviceId)
+   return { device }
+}
+
+groundstationSchema.statics.delete = async function(deviceId)
+{
+   const device = await this.findByIdAndDelete(deviceId)
+   if (!device) throw new Error("Device not found")
+
+   return { device }
+}
+
+groundstationSchema.statics.update = async function(userId, deviceId, latitude, longitude)
+{
+   const updates = {}
+   if (latitude !== undefined) updates.latitude = latitude
+   if(longitude !== undefined) updates.longitude = longitude
+
+   const device = await this.findByIdAndUpdate(deviceId, updates)
+   if (!device) throw new Error("Device not found")
+
+   return { device }
+}
+
+const Device = model("Device", groundstationSchema)
+
+module.exports = Device
