@@ -71,7 +71,6 @@ userSchema.statics.getAll = async function()
 {
    const users = this.find({})
    return { users }
-   return results
 }
 
 userSchema.statics.delete = async function(userId)
