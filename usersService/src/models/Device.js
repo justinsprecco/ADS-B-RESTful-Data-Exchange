@@ -2,7 +2,7 @@ const { Schema, model } = require("mongoose")
 
 /*
 Groundstation schema relies on the client to have its _id field match up
-with the groundstationID key from the messageADBSSchema and 
+with the groundstationID key from the messageADBSSchema and
 messageRadarSchema.
 
 Groundstation schema also relies on the client to have its userID field
@@ -13,7 +13,7 @@ user.
 */
 const groundstationSchema = new Schema(
    {
-      macAddress: 
+      macAddress:
     {
        type: String,
        unique: true,

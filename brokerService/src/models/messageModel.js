@@ -6,7 +6,7 @@ ID that corresponds to the message.
 
 A timestamp is given to the message so that it can be determined if the
 message is over a week old and needs to be purged.
-*/ 
+*/
 const messageADSBSchema = new Schema(
    {
       data: {
@@ -51,12 +51,12 @@ messageADSBSchema.statics.getByTime = async function(start, end)
 }
 
 /*
-The message Radar schema stores the message contents along with the 
+The message Radar schema stores the message contents along with the
 groundstation ID that corresponds to the message.
 
 A timestamp is given to the message so that it can be determined if the
 message is over a week old and needs to be purged.
-*/ 
+*/
 const messageRadarSchema = new Schema(
    {
       data: {

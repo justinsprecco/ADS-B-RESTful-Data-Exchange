@@ -1,5 +1,5 @@
 /*
-   This file provide the oauth URI endpoints that help generate tokens and 
+   This file provide the oauth URI endpoints that help generate tokens and
    verify each token.
 */
 
@@ -14,7 +14,7 @@ exports.generateAuthCode = async (req, res) =>
 {
    const payload = req.body
 
-   try 
+   try
    {
       const authCode = sign(payload, AUTH_CODE_SECRET, { expiresIn: "5m" })
 
@@ -40,14 +40,14 @@ exports.generateTokens = async (req, res) =>
    const accessOptions = { expiresIn: accessExpiry }
    const refreshOptions = { expiresIn: refreshExpiry }
 
-   try 
+   try
    {
       const accessToken = sign(payload, AUTH_TOKEN_SECRET, accessOptions)
       const refreshToken = sign(payload, REFRESH_TOKEN_SECRET, refreshOptions)
 
       return res.status(200).json({ accessToken, refreshToken })
    }
-   catch (err) 
+   catch (err)
    {
       return res.status(500).json({ message: err.message })
    }
@@ -66,7 +66,7 @@ exports.refreshAccessToken = async (req, res) =>
    const payload = { username, scope }
    const accessOptions = { expiresIn: accessExpiry }
 
-   try 
+   try
    {
       const accessToken = sign(payload, AUTH_TOKEN_SECRET, accessOptions)
 
@@ -84,13 +84,13 @@ exports.refreshAccessToken = async (req, res) =>
 exports.verifyAccessToken = async (req, res) =>
 {
    const authHeader = req.headers['authorization']
-   if (!authHeader) 
+   if (!authHeader)
    {
       return res.status(400).json({ message: "Authorization header is missing" })
    }
 
    const token = authHeader.split(' ')[1] // Assuming 'Bearer <token>'
-   if (!token) 
+   if (!token)
    {
       return res.status(400).json({ message: "Access token is missing" })
    }

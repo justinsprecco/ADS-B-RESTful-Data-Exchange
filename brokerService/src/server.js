@@ -15,7 +15,7 @@ openSocketConnections(server)
 server.listen(PORT, () => console.log(`Broker service running on port ${PORT}`))
 
 // Clean shutdown logic
-const shutdown = async () => 
+const shutdown = async () =>
 {
    console.log("\nGracefully shutting down...")
 

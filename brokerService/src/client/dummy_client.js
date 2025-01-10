@@ -29,9 +29,9 @@ const rl = readline.createInterface({
 })
 
 // Function to retrieve and display the latest ADS-B messages from the database
-async function fetchLatestAdsbMessages() 
+async function fetchLatestAdsbMessages()
 {
-   try 
+   try
    {
       const messages = await db.any(
          "SELECT * FROM adsb_messages ORDER BY timestamp DESC LIMIT 10",
@@ -39,16 +39,16 @@ async function fetchLatestAdsbMessages()
       )
       console.log("Latest ADS-B Messages:", messages)
    }
-   catch (error) 
+   catch (error)
    {
       console.error("Error fetching ADS-B messages:", error)
    }
 }
 
 // Function to retrieve and display ADS-B messages within a specific time range
-async function fetchAdsbMessagesByTime(start, end) 
+async function fetchAdsbMessagesByTime(start, end)
 {
-   try 
+   try
    {
       const messages = await db.any(
          "SELECT * FROM adsb_messages WHERE timestamp BETWEEN $1 AND $2 ORDER BY timestamp DESC",
@@ -56,26 +56,26 @@ async function fetchAdsbMessagesByTime(start, end)
       )
       console.log(`ADS-B Messages from ${start} to ${end}:`, messages)
    }
-   catch (error) 
+   catch (error)
    {
       console.error("Error fetching ADS-B messages:", error)
    }
 }
 
 // Adjusted function to prompt user for time range and fetch messages
-function queryMessagesByTime() 
+function queryMessagesByTime()
 {
    rl.question(
       "Enter start time (YYYY-MM-DD HH:MM:SS) or press ENTER to fetch latest messages: ",
-      (start) => 
+      (start) =>
       {
-         if (start === "") 
+         if (start === "")
          {
             fetchLatestAdsbMessages().finally(() => rl.close())
          }
-         else 
+         else
          {
-            rl.question("Enter end time (YYYY-MM-DD HH:MM:SS): ", (end) => 
+            rl.question("Enter end time (YYYY-MM-DD HH:MM:SS): ", (end) =>
             {
                fetchAdsbMessagesByTime(start, end).finally(() => rl.close())
             })
@@ -97,18 +97,18 @@ function queryMessagesByTime()
 
 // Enhanced test query to check database connection and interactive message fetching
 db.one("SELECT NOW()")
-   .then((result) => 
+   .then((result) =>
    {
       console.log("Database connection test:", result)
       queryMessagesByTime()
    })
-   .catch((error) => 
+   .catch((error) =>
    {
       console.error("Database connection test error:", error)
    })
 
 // Graceful shutdown and database disconnection
-process.on("exit", () => 
+process.on("exit", () =>
 {
    console.log("Database connection closed.")
 })

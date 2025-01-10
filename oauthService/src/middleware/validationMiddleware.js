@@ -15,11 +15,11 @@ const getScope = (scope) =>
       user: { accessExpiry: '20m', refreshExpiry: '60m' }
    }
 
-   if (scopeInfo[scope]) 
+   if (scopeInfo[scope])
    {
       return scopeInfo[scope]
    }
-   else 
+   else
    {
       throw new Error(`${scope} is an invalid scope!`)
    }
@@ -33,7 +33,7 @@ exports.verifyScope = async(req, res, next) =>
    const { username, scope } = req.body
    if (!username || !scope) return res.status(400).json({ message: "Header is missing user data!" })
 
-   try 
+   try
    {
       getScope(scope)
 

@@ -13,7 +13,7 @@ const tokenSchema = new Schema(
 tokenSchema.pre("save", async function(next)
 {
    const token = this
-   if (token.isModified("tokenId")) 
+   if (token.isModified("tokenId"))
    {
       const hashedToken = await hash(this.tokenId, 8)
       token.tokenId = hashedToken

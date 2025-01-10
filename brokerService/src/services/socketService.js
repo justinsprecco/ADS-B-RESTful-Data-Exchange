@@ -6,7 +6,7 @@ const activeUserRequests = new Map()
 
 let stationSocketServ, usersSocketServ
 
-function openSocketConnections(server) 
+function openSocketConnections(server)
 {
    stationSocketServ = new WebSocket.Server({ server })
    usersSocketServ = new WebSocket.Server({ port: USER_SOCKET_PORT })
@@ -22,7 +22,7 @@ async function closeWebSocketServer(server, name)
    console.log(`${name} WebSocket server closed.`)
 }
 
-const closeSocketConnections = async () => 
+const closeSocketConnections = async () =>
 {
    await Promise.all([
       closeWebSocketServer(stationSocketServ, "Groundstation"),
@@ -30,14 +30,14 @@ const closeSocketConnections = async () =>
    ])
 }
 
-function handleStationConnection(ws) 
+function handleStationConnection(ws)
 {
    console.log("Groundstation connection established.")
    ws.on("message", (message) => processStationMessage(ws, message))
    ws.on("close", () => console.log(`Groundstation socket closed for id: ${ws.stationId}`))
 }
 
-function handleUserConection(ws) 
+function handleUserConection(ws)
 {
    console.log("User connection established.")
    ws.on("message", (message) => processUserMessage(ws, message))
@@ -49,12 +49,12 @@ function processStationMessage(ws, message)
    const data = JSON.parse(message)
    console.log("Received message:", data)
 
-   if (data.type === "init") 
+   if (data.type === "init")
    {
       console.log("Socket init signal received")
       ws.stationId = data.stationId
    }
-   else 
+   else
    {
       forwardToUsers(data.stationId, data)
       adminQueue.push(data)
@@ -65,11 +65,11 @@ function processStationMessage(ws, message)
 function processUserMessage(ws, message)
 {
    const data = JSON.parse(message)
-   if (data.type === "init") 
+   if (data.type === "init")
    {
       console.log("Client init signal received")
       ws.userId = data.userId
-      if (!ws.userId) 
+      if (!ws.userId)
       {
          console.log("userId is undefined")
          ws.close()
@@ -80,28 +80,28 @@ function processUserMessage(ws, message)
 function forwardToUsers(stationId, data)
 {
    const activeRequests = activeUserRequests.get(stationId) || []
-   activeRequests.forEach((userId) => 
+   activeRequests.forEach((userId) =>
    {
       const userSocket = getUserSocket(userId)
       if (userSocket) userSocket.send(JSON.stringify(data))
    })
 }
 
-function getGroundStationSocket(deviceId) 
+function getGroundStationSocket(deviceId)
 {
    return Array.from(stationSocketServ.clients).find(
       (client) => client.stationId === deviceId,
    )
 }
 
-function getUserSocket(userId) 
+function getUserSocket(userId)
 {
    return Array.from(usersSocketServ.clients).find(
       (client) => client.userId === userId,
    )
 }
 
-function setRequest(userId, deviceId) 
+function setRequest(userId, deviceId)
 {
    if (!activeUserRequests.has(deviceId)) activeUserRequests.set(deviceId, [])
    activeUserRequests.get(deviceId).push(userId)

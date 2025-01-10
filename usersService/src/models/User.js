@@ -2,7 +2,7 @@ const { Schema, model } = require("mongoose")
 const { hash, compare } = require("bcryptjs")
 
 /*
-The user schema contains the id of a user and the number of 
+The user schema contains the id of a user and the number of
 landings/touchandgo during its entire lifetime for all of its groundstations.
 
 numLandings contain the total number of landings (not including touch and go)
@@ -31,7 +31,7 @@ const userSchema = new Schema(
 userSchema.pre("save", async function(next)
 {
    const user = this
-   if (user.isModified("password")) 
+   if (user.isModified("password"))
    {
       const hashedPassword = await hash(this.password, 8)
       user.password = hashedPassword
