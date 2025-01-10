@@ -14,35 +14,35 @@ jest.mock('../../src/database/db', () => ({
    dbDisconnect: jest.fn(),
 }))
 
-beforeEach(() => 
+beforeEach(() =>
 {
    jest.clearAllMocks()
 })
 
-describe("POST /users", () => 
+describe("POST /users", () =>
 {
-   it("should create a new user", async () => 
+   it("should create a new user", async () =>
    {
-      User.postUser.mockResolvedValue({ id: 1, username: "testUser", password: "password123" })
+      User.create.mockResolvedValue({ _id: 1, username: "testUser", password: "password123" })
 
       const res = await request(app)
          .post("/users")
          .send({ username: "testUser", password: "password123" })
 
       expect(res.status).toBe(201)
-      expect(res.body.message).toBe("User added with ID: 1")
+      expect(res.body.message).toBe("User testUser created successfully with ID: 1")
    })
 
-   it("should return an error if registration fails", async () => 
+   it("should return an error if username already exists", async () =>
    {
-      User.postUser.mockRejectedValue(new Error("Registration failed"))
+      User.create.mockRejectedValue(new Error("Username already exists"))
 
       const res = await request(app)
          .post("/users")
-         .send({ username: "invalidUser", password: "wrongPassword" })
+         .send({ username: "existingUser", password: "password" })
 
       expect(res.status).toBe(500)
-      expect(res.body.message).toMatch(/User registration failed/)
+      expect(res.body.message).toMatch(/Error: User registration failed: Username already exists/)
    })
 })
 
