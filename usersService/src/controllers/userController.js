@@ -9,13 +9,13 @@ exports.postUser = async (req, res) =>
 
    try
    {
-      const { userId } = await User.create(username, password)
+      const user = await User.create(username, password)
 
-      return res.status(201).json({ message: `User added with ID: ${userId}` })
+      return res.status(201).json({ message: `User ${user.username} created successfully with ID: ${user._id}`})
    }
-   catch (err) 
+   catch (err)
    {
-      return res.status(500).json({ message: "Error: User registration failed: " + err })
+      return res.status(500).json({ message: "Error: User registration failed: " + err.message })
    }
 }
 
@@ -28,7 +28,7 @@ exports.validateUser = async (req, res) =>
    try
    {
       const { userId } = await User.validate(username, password)
-      if (!userId) 
+      if (!userId)
       {
          return res.status(401).json({ message: "Invalid username or password" })
       }
@@ -60,7 +60,7 @@ exports.getUsers = async (req, res) =>
 // get user given user id
 exports.getUser = async (req, res) =>
 {
-   try 
+   try
    {
       const id = parseInt(req.params.id)
 
@@ -104,7 +104,7 @@ exports.updateUser = async (req, res) =>
 
       const { user } = await User.update(id, username, password)
 
-      if (!user) 
+      if (!user)
       {
          return res.status(402).json({ message: "Include username or password in body to update" })
       }

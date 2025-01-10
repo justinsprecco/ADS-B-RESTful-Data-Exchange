@@ -46,7 +46,7 @@ userSchema.statics.create = async function(username, password)
 
    const newUser = new this({ username, password })
    await newUser.save()
-   return { userId: newUser._id }
+   return { user: newUser }
 }
 
 userSchema.statics.validate = async function(username, password)

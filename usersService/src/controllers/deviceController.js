@@ -6,14 +6,14 @@ exports.postDevice = async (req, res) =>
 {
    try
    {
-      const id = parseInt(req.params.id)
+      const userId = parseInt(req.params.id, 10)
       const { macAddress, latitude, longitude } = req.body
 
       // NOTE: should get macAddress / identifier from somewhere else???
 
-      const device = await Device.create(macAddress, latitude, longitude)
+      const device = await Device.create(userId, macAddress, latitude, longitude)
 
-      return res.status(201).json({ message: `Device ${macAddress} added with id ${device._id} and associated with user ${id}` })
+      return res.status(201).json({ message: `Device ${device.macAddress} added with id ${device._id} and associated with user ${device.userId}` })
    }
    catch (err)
    {
