@@ -1,6 +1,7 @@
 const WebSocket = require("ws")
 const { adminQueue } = require("./adminQueue")
 const { USER_SOCKET_PORT } = require("../config")
+const { ADSMessage } = require("../models/messageModel")
 
 const activeUserRequests = new Map()
 
@@ -44,7 +45,7 @@ function handleUserConection(ws)
    ws.on("close", () => console.log(`User socket closed for id: ${ws.userId}`))
 }
 
-function processStationMessage(ws, message)
+const processStationMessage = async(ws, message)  =>
 {
    const data = JSON.parse(message)
    console.log("Received message:", data)
@@ -58,7 +59,9 @@ function processStationMessage(ws, message)
    {
       forwardToUsers(data.stationId, data)
       adminQueue.push(data)
-      // TODO: insert into database
+      const buffer = Buffer.from(data.messageData)
+      const timestamp = new Date(data.timeStamp)
+      await ADSMessage.create(buffer, data.groundStationID, timestamp)
    }
 }
 

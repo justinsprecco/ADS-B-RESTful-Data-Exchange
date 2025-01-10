@@ -10,18 +10,26 @@ message is over a week old and needs to be purged.
 const messageADSBSchema = new Schema(
    {
       data: {
-         type: String,
+         type: Buffer,
          required: true
-      },
-      timestamp: {
-         type: Date,
-         default: Date.now
       },
       groundstationID: {
          type: Number,
          required: true
+      },
+      timestamp: {
+         type: Date,
+         required: true
       }
    })
+
+messageADSBSchema.statics.create = async function(data, groundstationID, timestamp)
+{
+   const message = new this({ data, groundstationID, timestamp })
+   await message.save()
+
+   return { message }
+}
 
 messageADSBSchema.statics.getAll = async function()
 {
