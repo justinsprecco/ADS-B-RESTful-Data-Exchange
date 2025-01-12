@@ -5,11 +5,6 @@ const User = require("../../src/models/User")
 // Mock user model
 jest.mock("../../src/models/User")
 jest.mock('../../src/database/db', () => ({
-   db: {
-      connect: jest.fn(),
-      any: jest.fn(),
-      none: jest.fn(),
-   },
    dbConnect: jest.fn(),
    dbDisconnect: jest.fn(),
 }))
