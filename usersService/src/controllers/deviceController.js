@@ -21,16 +21,20 @@ exports.postDevice = async (req, res) =>
    }
 }
 
-// get "/users/:id/devices?limit=<param>&start[< "l,g" + "e, ">]=<param>"
-// get devices from a user given query
-// Q: so this query will only be for a specific user?
+// get "/users/:id/devices"
+// get all devices from a user given query
 exports.getDevices = async (req, res) =>
 {
    try
    {
       const userId = parseInt(req.params.id)
 
-      const devices = await Device.getByUserId(userId)
+      const { devices } = await Device.getByUserId(userId)
+
+      if (!devices.length)
+      {
+         return res.status(404).json({ message: "No devices found for this user." })
+      }
 
       return res.status(200).json({ message: devices })
    }
@@ -46,9 +50,14 @@ exports.getDevice = async (req, res) =>
 {
    try
    {
-      const deviceid = parseInt(req.params.deviceid)
+      const deviceId = parseInt(req.params.deviceid)
 
-      const device = await Device.getById(deviceId)
+      const { device } = await Device.getById(deviceId)
+
+      if (!device)
+      {
+         return res.status(404).json({ message: `No device found with id ${deviceId}.` })
+      }
 
       return res.status(200).json({ message: device })
    }
@@ -64,15 +73,20 @@ exports.deleteDevice = async (req, res) =>
 {
    try
    {
-      const deviceid = parseInt(req.params.deviceid)
+      const deviceId = parseInt(req.params.deviceid)
 
-      await Device.delete(deviceId)
+      const { device } = await Device.delete(deviceId)
 
-      return res.status(200).json({ message: `device ${deviceid} deleted.` })
+      if (!device)
+      {
+         return res.status(404).json({ message: `No device found with id ${deviceId}.` })
+      }
+
+      return res.status(200).json({ message: `Device ${deviceId} deleted successfully.` })
    }
    catch (err)
    {
-      return res.status(500).json({ message: `Error: Unable to delete device ${deviceid}.` + err })
+      return res.status(500).json({ message: `Error: Unable to delete device.` + err })
    }
 }
 
@@ -82,17 +96,22 @@ exports.updateDevice = async (req, res) =>
 {
    try
    {
-      const deviceid = parseInt(req.params.deviceid)
+      const deviceId = parseInt(req.params.deviceid)
       const { latitude, longitude } = req.body
 
-      const device = await Device.update(deviceId, latitude, longitude)
-
-      if (!device)
+      if (latitude == undefined && longitude == undefined)
       {
          return res.status(402).json({ message: "Include latitude or longitude in body to update" })
       }
 
-      return res.status(200).json({ message: `Device ${deviceid} updated.` })
+      const { device } = await Device.update(deviceId, latitude, longitude)
+
+      if (!device)
+      {
+         return res.status(404).json({ message: `No device found with id ${deviceId}.` })
+      }
+
+      return res.status(200).json({ message: `Device ${deviceId} updated successfully.` })
    }
    catch (err)
    {

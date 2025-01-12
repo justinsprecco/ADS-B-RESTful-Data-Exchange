@@ -50,7 +50,7 @@ groundstationSchema.statics.getByUserId = async function(userId)
    return { devices }
 }
 
-groundstationSchema.statics.getById = async function(userId, deviceId)
+groundstationSchema.statics.getById = async function(deviceId)
 {
    const device = await this.findById(deviceId)
    return { device }
@@ -59,8 +59,6 @@ groundstationSchema.statics.getById = async function(userId, deviceId)
 groundstationSchema.statics.delete = async function(deviceId)
 {
    const device = await this.findByIdAndDelete(deviceId)
-   if (!device) throw new Error("Device not found")
-
    return { device }
 }
 
@@ -68,10 +66,9 @@ groundstationSchema.statics.update = async function(userId, deviceId, latitude, 
 {
    const updates = {}
    if (latitude !== undefined) updates.latitude = latitude
-   if(longitude !== undefined) updates.longitude = longitude
+   if (longitude !== undefined) updates.longitude = longitude
 
    const device = await this.findByIdAndUpdate(deviceId, updates)
-   if (!device) throw new Error("Device not found")
 
    return { device }
 }
