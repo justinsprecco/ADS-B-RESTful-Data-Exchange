@@ -59,9 +59,9 @@ exports.getUser = async (req, res) =>
 {
    try
    {
-      const id = parseInt(req.params.id)
+      const userId = req.params.id
 
-      const { user } = await User.getById(id)
+      const { user } = await User.getById(userId)
 
       return res.status(200).json({ user })
    }
@@ -79,7 +79,7 @@ exports.deleteUser = async (req, res) =>
 {
    try
    {
-      const id = parseInt(req.params.id)
+      const id = req.params.id
 
       const { userId } = await User.delete(id)
 
@@ -98,7 +98,7 @@ exports.updateUser = async (req, res) =>
 {
    try
    {
-      const id = parseInt(req.params.id)
+      const id = req.params.id
       const { username, password } = req.body
 
       const { user } = await User.update(id, username, password)

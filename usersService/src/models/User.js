@@ -56,14 +56,15 @@ userSchema.statics.validate = async function(username, password)
 
 userSchema.statics.getById = async function(userId)
 {
-   const user = await this.findById(userId)
+   console.log(userId)
+   const user = await this.findById(userId).select('username devices')
    if (!user) throw new Error("User not found")
    return { user }
 }
 
 userSchema.statics.getAll = async function()
 {
-   const users = await this.find({})
+   const users = await this.find({}).select('_id username devices')
    if (!users.length) throw new Error("No users exist")
    return { users }
 }

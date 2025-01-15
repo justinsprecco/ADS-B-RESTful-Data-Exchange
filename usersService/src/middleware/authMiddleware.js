@@ -28,7 +28,7 @@ exports.verifyAccessToken = async (req, res, next) =>
          const response = await post(`${AUTH_URI}/verify`, { accessToken })
       */
 
-      const decoded = verify(accessToken, AUTH_TOKEN_SECRET)
+      const decoded = await verify(accessToken, AUTH_TOKEN_SECRET)
 
       if (!decoded)
       {
