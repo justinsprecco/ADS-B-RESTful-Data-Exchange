@@ -25,6 +25,8 @@ messageADSBSchema.statics.create = async function(data, macAddress, timestamp)
 messageADSBSchema.statics.getAll = async function()
 {
    const messages = await this.find({})
+   if (!messages.length) throw new Error("No messages found")
+
    return { messages }
 }
 
@@ -49,55 +51,6 @@ messageADSBSchema.statics.getByTime = async function(start, end)
    return { messages }
 }
 
-/*
-The message Radar schema stores the message contents along with the
-groundstation ID that corresponds to the message.
-
-A timestamp is given to the message so that it can be determined if the
-message is over a week old and needs to be purged.
-*/
-const messageRadarSchema = new Schema(
-   {
-      macAddress: { type: String, required: true },
-      data: { type: String, required: true },
-      timestamp: { type: Date, default: Date.now, required: true }
-   })
-
-messageRadarSchema.statics.create = async function(data, macAddress, timestamp)
-{
-   const message = new this({ data, macAddress, timestamp })
-   await message.save()
-
-   return { message }
-}
-
-messageRadarSchema.statics.getAll = async function()
-{
-   const messages = await this.find()
-   return { messages }
-}
-
-messageRadarSchema.statics.getLatest = async function()
-{
-   const messages = await this.find()
-      .sort({ timestamp: -1 })
-      .limit(10)
-
-   return { messages }
-}
-
-messageRadarSchema.statics.getByTime = async function(start, end)
-{
-   const messages = await this.find
-   ({
-      timestamp: { $gte: start, $lte: end }
-   })
-      .sort({ timestamp: -1 })
-
-   return { messages }
-}
-
 const ADSMessage = model("ADSMessage", messageADSBSchema)
-const RadarMessage = model("RadarMessage", messageRadarSchema)
 
-module.exports = { ADSMessage, RadarMessage }
+module.exports = { ADSMessage }

@@ -1,7 +1,7 @@
 const WebSocket = require("ws")
 const { adminQueue } = require("./adminQueue")
 const { USER_SOCKET_PORT } = require("../config")
-const { ADSMessage } = require("../models/messageModel")
+const { ADSMessage } = require("../models/Message")
 
 const activeUserRequests = new Map()
 

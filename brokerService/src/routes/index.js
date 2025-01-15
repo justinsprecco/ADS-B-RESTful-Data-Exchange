@@ -5,9 +5,6 @@ const {
    getAllADSMessages,
    getLatestADSMessages,
    getADSMessagesByTime,
-   getAllRadarMessages,
-   getLatestRadarMessages,
-   getRadarMessagesByTime,
    subscribe,
    unsubscribe,
 } = require("../controllers")
@@ -23,9 +20,6 @@ router.all("/auth/*", proxy(AUTH_PROXY))
 router.get("/message/ads", getAllADSMessages)
 router.get("/message/ads/latest", getLatestADSMessages)
 router.get("/message/ads/time", getADSMessagesByTime)
-router.get("/message/radar", getAllRadarMessages)
-router.get("/message/radar/latest", getLatestRadarMessages)
-router.get("/message/radar/time", getRadarMessagesByTime)
 
 // Stream Routes
 router.post("/users/:id/devices/:deviceid/stream", handleStream)
