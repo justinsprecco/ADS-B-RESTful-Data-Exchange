@@ -9,23 +9,14 @@ message is over a week old and needs to be purged.
 */
 const messageADSBSchema = new Schema(
    {
-      data: {
-         type: Buffer,
-         required: true
-      },
-      groundstationID: {
-         type: Number,
-         required: true
-      },
-      timestamp: {
-         type: Date,
-         required: true
-      }
+      macAddress: { type: String, required: true },
+      data: { type: Buffer, required: true },
+      timestamp: { type: Date, required: true }
    })
 
-messageADSBSchema.statics.create = async function(data, groundstationID, timestamp)
+messageADSBSchema.statics.create = async function(data, macAddress, timestamp)
 {
-   const message = new this({ data, groundstationID, timestamp })
+   const message = new this({ data, macAddress, timestamp })
    await message.save()
 
    return { message }
@@ -67,19 +58,18 @@ message is over a week old and needs to be purged.
 */
 const messageRadarSchema = new Schema(
    {
-      data: {
-         type: String,
-         required: true
-      },
-      timestamp: {
-         type: Date,
-         default: Date.now
-      },
-      groundstationID: {
-         type: Number,
-         required: true
-      }
+      macAddress: { type: String, required: true },
+      data: { type: String, required: true },
+      timestamp: { type: Date, default: Date.now, required: true }
    })
+
+messageRadarSchema.statics.create = async function(data, macAddress, timestamp)
+{
+   const message = new this({ data, macAddress, timestamp })
+   await message.save()
+
+   return { message }
+}
 
 messageRadarSchema.statics.getAll = async function()
 {

@@ -59,9 +59,9 @@ const processStationMessage = async(ws, message)  =>
    {
       forwardToUsers(data.stationId, data)
       adminQueue.push(data)
-      const buffer = Buffer.from(data.messageData)
-      const timestamp = new Date(data.timeStamp)
-      await ADSMessage.create(buffer, data.groundStationID, timestamp)
+      const buffer = Buffer.from(data.message)
+      const timestamp = new Date(data.timestamp)
+      await ADSMessage.create(buffer, data.stationId, timestamp)
    }
 }
 
