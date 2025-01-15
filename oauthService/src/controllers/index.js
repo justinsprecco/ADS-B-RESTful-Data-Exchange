@@ -16,7 +16,7 @@ exports.generateAuthCode = async (req, res) =>
 
    try
    {
-      const authCode = sign(payload, AUTH_CODE_SECRET, { expiresIn: "5m" })
+      const authCode = await sign(payload, AUTH_CODE_SECRET, { expiresIn: "5m" })
 
       return res.status(200).json({ authCode })
    }
@@ -42,8 +42,8 @@ exports.generateTokens = async (req, res) =>
 
    try
    {
-      const accessToken = sign(payload, AUTH_TOKEN_SECRET, accessOptions)
-      const refreshToken = sign(payload, REFRESH_TOKEN_SECRET, refreshOptions)
+      const accessToken = await sign(payload, AUTH_TOKEN_SECRET, accessOptions)
+      const refreshToken = await sign(payload, REFRESH_TOKEN_SECRET, refreshOptions)
 
       return res.status(200).json({ accessToken, refreshToken })
    }
@@ -68,7 +68,7 @@ exports.refreshAccessToken = async (req, res) =>
 
    try
    {
-      const accessToken = sign(payload, AUTH_TOKEN_SECRET, accessOptions)
+      const accessToken = await sign(payload, AUTH_TOKEN_SECRET, accessOptions)
 
       return res.status(200).json({ accessToken })
    }
@@ -97,7 +97,7 @@ exports.verifyAccessToken = async (req, res) =>
 
    try
    {
-      verify(token, AUTH_TOKEN_SECRET)
+      await verify(token, AUTH_TOKEN_SECRET)
 
       return res.status(200).json({ message: "Access token is valid" })
    }
