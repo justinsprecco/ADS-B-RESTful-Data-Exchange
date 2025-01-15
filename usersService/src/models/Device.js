@@ -1,4 +1,5 @@
-const { Schema, model } = require("mongoose")
+const { Schema, model, startSession } = require("mongoose")
+const User = require("./User")
 
 /*
 Groundstation schema relies on the client to have its _id field match up
@@ -13,24 +14,10 @@ user.
 */
 const groundstationSchema = new Schema(
    {
-      macAddress:
-    {
-       type: String,
-       unique: true,
-       required: true
-    },
-      latitude: {
-         type: Number,
-         required: true
-      },
-      longitude: {
-         type: Number,
-         required: true
-      },
-      userID: {
-         type: Number,
-         required: true
-      }
+      userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+      macAddress: { type: String, unique: true, required: true },
+      latitude: { type: Number, required: true },
+      longitude: { type: Number, required: true }
    })
 
 groundstationSchema.statics.create = async function(userId, macAddress, latitude, longitude)
@@ -47,28 +34,56 @@ groundstationSchema.statics.create = async function(userId, macAddress, latitude
 groundstationSchema.statics.getByUserId = async function(userId)
 {
    const devices = await this.find({ userId })
+
+   if (!devices.length) throw new Error("No devices found for this user")
+
    return { devices }
 }
 
 groundstationSchema.statics.getById = async function(deviceId)
 {
    const device = await this.findById(deviceId)
+   if (!device) throw new Error("Device not found")
    return { device }
 }
 
 groundstationSchema.statics.delete = async function(deviceId)
 {
-   const device = await this.findByIdAndDelete(deviceId)
-   return { device }
+   const session = await startSession()
+
+   try
+   {
+      session.startTransaction()
+      const device = await this.findByIdAndDelete(deviceId)
+      if (!device) throw new Error("Device not found")
+
+      await User.updateOne({ devices: deviceId }, { $pull: { devices: deviceId } }).session(session)
+
+      await session.commitTransaction()
+      return { deviceId: device._id }
+   }
+   catch (error)
+   {
+      await session.abortTransaction()
+      throw error
+   }
+   finally
+   {
+      session.endSession()
+   }
 }
 
 groundstationSchema.statics.update = async function(userId, deviceId, latitude, longitude)
 {
-   const updates = {}
-   if (latitude !== undefined) updates.latitude = latitude
-   if (longitude !== undefined) updates.longitude = longitude
+   const device = await this.findById(deviceId)
+   if (!device) throw new Error("Device not found")
 
-   const device = await this.findByIdAndUpdate(deviceId, updates)
+   if (!latitude && !longitude) throw new Error("Latitude and/or longitude not provided")
+
+   if (latitude !== undefined) device.latitude = latitude
+   if (longitude !== undefined) device.longitude = longitude
+
+   await device.save()
 
    return { device }
 }

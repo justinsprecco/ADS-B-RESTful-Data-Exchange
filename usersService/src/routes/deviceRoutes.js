@@ -13,10 +13,10 @@ router.post("/:id/devices", postDevice)
 
 router.get("/:id/devices", getDevices)
 
-router.get("/:id/devices/:deviceid", getDevice)
+router.get("/:id/devices/:deviceId", getDevice)
 
-router.delete("/:id/devices/:deviceid", deleteDevice)
+router.delete("/:id/devices/:deviceId", deleteDevice)
 
-router.put("/:id/devices/:deviceid", updateDevice)
+router.put("/:id/devices/:deviceId", updateDevice)
 
 module.exports = router

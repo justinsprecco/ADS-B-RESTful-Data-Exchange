@@ -1,5 +1,6 @@
-const { Schema, model } = require("mongoose")
+const { Schema, model, startSession } = require("mongoose")
 const { hash, compare } = require("bcryptjs")
+const Device = require("./Device")
 
 /*
 The user schema contains the id of a user and the number of
@@ -13,18 +14,11 @@ user.
 */
 const userSchema = new Schema(
    {
-      username:
-    {
-       type: String,
-       required: true
-    },
-      password:
-    {
-       type: String,
-       required: true
-    },
+      username: { type: String, required: true },
+      password: { type: String, required: true },
+      devices: [{ type: Schema.Types.ObjectId, ref: "Device" }],
       numLandings: Number,
-      touchAndGo: Number
+      touchAndGo: Number,
    }
 )
 
@@ -44,9 +38,9 @@ userSchema.statics.create = async function(username, password)
    const existingUser = await this.findOne({ username })
    if (existingUser) throw new Error("Username already exists")
 
-   const newUser = new this({ username, password })
-   await newUser.save()
-   return { user: newUser }
+   const user = new this({ username, password })
+   await user.save()
+   return { user }
 }
 
 userSchema.statics.validate = async function(username, password)
@@ -69,26 +63,48 @@ userSchema.statics.getById = async function(userId)
 
 userSchema.statics.getAll = async function()
 {
-   const users = this.find({})
+   const users = await this.find({})
+   if (!users.length) throw new Error("No users exist")
    return { users }
 }
 
 userSchema.statics.delete = async function(userId)
 {
-   const user = await this.findByIdAndDelete(userId)
-   if (!user) throw new Error("User not found")
+   const session = await startSession()
 
-   return { user }
+   try
+   {
+      session.startTransaction()
+      const user = await this.findByIdAndDelete(userId).session(session)
+      if (!user) throw new Error("User not found")
+
+      await Device.deleteMany({ userId }).session(session)
+
+      await session.commitTransaction()
+      return { userId: user._id }
+   }
+   catch (error)
+   {
+      await session.abortTransaction()
+      throw error
+   }
+   finally
+   {
+      session.endSession()
+   }
 }
 
 userSchema.statics.update = async function(userId, username, password)
 {
-   const updates = {}
-   if (username !== undefined) updates.username = username
-   if(password !== undefined) updates.password = password
-
-   const user = await this.findByIdAndUpdate(userId, updates)
+   const user = await this.findById(userId)
    if (!user) throw new Error("User not found")
+
+   if (!username && !password) throw new Error("Username and/or password not provided")
+
+   if (username !== undefined) user.username = username
+   if (password !== undefined) user.password = password
+
+   await user.save()
 
    return { user }
 }
