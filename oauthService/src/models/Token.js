@@ -3,42 +3,43 @@ const { hash, compare } = require("bcryptjs")
 
 const tokenSchema = new Schema(
    {
-      userId: { type: Number, required: true },
-      tokenId: { type: String, required: true },
+      userId: { type: String, required: true },
+      token: { type: String, required: true },
       issuedAt: { type: Date, required: true },
       expiresAt: { type: Date, required: true },
-      revoked: { type: Boolean, default: false }
+      revoked: { type: Boolean, default: false },
+      scope: { type: String, default: "user" }
    })
 
 tokenSchema.pre("save", async function(next)
 {
-   const token = this
-   if (token.isModified("tokenId"))
+   if (this.isModified("token"))
    {
-      const hashedToken = await hash(this.tokenId, 8)
-      token.tokenId = hashedToken
+      this.token = await hash(this.token, 8)
    }
    next()
 })
 
-tokenSchema.statics.create = async function(userId, tokenId, issuedAt, expiresAt)
+tokenSchema.statics.create = async function(userId, token, issuedAt, expiresAt, scope)
 {
-   const token = new this({ userId, tokenId, issuedAt, expiresAt })
-   await token.save()
-   return { tokenId: token._id }
+   const newToken = new this({ userId, token, issuedAt, expiresAt, scope })
+   await newToken.save()
+   return { tokenId: newToken._id }
 }
 
-tokenSchema.statics.validate = async function(userId, tokenId)
+tokenSchema.statics.validate = async function(userId, token)
 {
-   const token = await this.findOne({ userId })
-   if (!token) throw new Error("Token not found")
+   const existingToken = await this.findOne({ userId })
+   if (!existingToken) throw new Error("Token not found")
 
-   const isMatch = await compare(tokenId, token.tokenId)
-   if (!isMatch) throw new Error("Token not found")
+   const isMatch = await compare(token, existingToken.token)
+   if (!isMatch) throw new Error("Token is invalid")
 
-   if (token.revoked) throw new Error("Token is revoked")
+   if (existingToken.revoked) throw new Error("Token is revoked")
 
-   return { tokenId: token._id }
+   if (existingToken.expiresAt <= new Date()) throw new Error("Token is expired")
+
+   return { scope: existingToken.scope }
 }
 
 tokenSchema.statics.getAll = async function()
@@ -47,18 +48,18 @@ tokenSchema.statics.getAll = async function()
    return { tokens }
 }
 
-tokenSchema.statics.revoke = async function(userId, tokenId)
+tokenSchema.statics.revoke = async function(userId, token)
 {
-   const token = await this.findOneAndUpdate({ userId, tokenId }, { revoked: true }, { new: true })
-   if (!token) throw new Error("Token not found")
+   const existingToken = await this.findOne({ userId })
+   if (!existingToken) throw new Error("Token not found")
 
-   const isMatch = await compare(tokenId, token.tokenId)
-   if (!isMatch) throw new Error("Token not found")
+   const isMatch = await compare(token, existingToken.token)
+   if (!isMatch) throw new Error("Token is invalid")
 
-   token.revoked = true
-   await token.save()
+   existingToken.revoked = true
+   await existingToken.save()
 
-   return { token }
+   return { tokenId: existingToken._id }
 }
 
 const Token = model("Token", tokenSchema)
