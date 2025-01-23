@@ -8,7 +8,7 @@ exports.postDevice = async (req, res) =>
    try
    {
 
-      const userId = parseInt(req.params.id)
+      const userId = req.params.id
       const { macAddress, latitude, longitude } = req.body
 
       const { user } = await User.getById(userId)
@@ -32,7 +32,7 @@ exports.getDevices = async (req, res) =>
 {
    try
    {
-      const userId = parseInt(req.params.id)
+      const userId = req.params.id
 
       const { user } = await User.getById(userId)
 
@@ -53,7 +53,7 @@ exports.getDevice = async (req, res) =>
 {
    try
    {
-      const deviceId = parseInt(req.params.deviceId)
+      const { deviceId } = req.params
 
       const { device } = await Device.getById(deviceId)
 
@@ -72,9 +72,9 @@ exports.deleteDevice = async (req, res) =>
 {
    try
    {
-      const id = parseInt(req.params.deviceId)
+      const { deviceId } = req.params
 
-      const { deviceId } = await Device.delete(id)
+      await Device.delete(deviceId)
 
       return res.status(200).json({ message: `Device ${deviceId} deleted successfully.` })
    }
@@ -91,9 +91,10 @@ exports.updateDevice = async (req, res) =>
 {
    try
    {
-      const deviceId = parseInt(req.params.deviceId)
+      const { deviceId } = req.params
       const { latitude, longitude } = req.body
 
+      console.log(deviceId)
       const { device } = await Device.update(deviceId, latitude, longitude)
 
       return res.status(200).json({ message: `Device ${device._id} updated successfully.` })

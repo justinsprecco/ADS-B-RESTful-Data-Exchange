@@ -73,7 +73,7 @@ groundstationSchema.statics.delete = async function(deviceId)
    }
 }
 
-groundstationSchema.statics.update = async function(userId, deviceId, latitude, longitude)
+groundstationSchema.statics.update = async function(deviceId, latitude, longitude)
 {
    const device = await this.findById(deviceId)
    if (!device) throw new Error("Device not found")
