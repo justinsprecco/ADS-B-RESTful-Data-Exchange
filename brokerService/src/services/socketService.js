@@ -16,14 +16,14 @@ function openSocketConnections(server)
    usersSocketServ.on("connection", handleUserConection)
 }
 
-async function closeWebSocketServer(server, name)
+const closeWebSocketServer = async(server, name) =>
 {
    server.clients.forEach((socket) => socket.close())
    await new Promise((resolve) => server.close(resolve))
    console.log(`${name} WebSocket server closed.`)
 }
 
-const closeSocketConnections = async () =>
+const closeSocketConnections = async() =>
 {
    await Promise.all([
       closeWebSocketServer(stationSocketServ, "Groundstation"),
@@ -49,6 +49,8 @@ const processStationMessage = async(ws, message)  =>
 {
    const data = JSON.parse(message)
    console.log("Received message:", data)
+
+   // TODO: Verify device is registered
 
    if (data.type === "init")
    {
