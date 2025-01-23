@@ -1,4 +1,4 @@
-const { connect } = require("mongoose")
+const { connect, connection } = require("mongoose")
 const { DB_URI } = require("../config")
 
 const dbConnect = async () =>
@@ -19,7 +19,7 @@ const dbDisconnect = async () =>
 {
    try
    {
-      await mongoose.connection.close()
+      await connection.close()
       console.log("MongoDB connection closed gracefully.")
 
    }

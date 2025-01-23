@@ -33,7 +33,7 @@ const dbDisconnect = async () =>
 {
    try
    {
-      await mongoose.connection.close()
+      await connection.close()
       console.log("MongoDB connection closed gracefully.")
 
    }
