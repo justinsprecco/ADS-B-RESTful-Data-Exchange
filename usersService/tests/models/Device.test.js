@@ -91,7 +91,7 @@ describe("Device Model", () =>
       const { user } = await User.create("testuser", "testpassword")
       const { device } = await Device.create(user._id, "00:14:22:01:23:45", 25, 10)
 
-      const updatedDevice = await Device.update(user._id, device._id, 50, 60)
+      const updatedDevice = await Device.update(device._id, 50, 60)
       expect(updatedDevice.device.latitude).toBe(50)
       expect(updatedDevice.device.longitude).toBe(60)
    })
@@ -101,7 +101,7 @@ describe("Device Model", () =>
       const { user } = await User.create("testuser", "testpassword")
       const { device } = await Device.create(user._id, "00:14:22:01:23:45", 25, 10)
 
-      await expect(Device.update(user._id, device._id)).rejects.toThrow(
+      await expect(Device.update(device._id)).rejects.toThrow(
          "Latitude and/or longitude not provided"
       )
    })
