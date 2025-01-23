@@ -10,5 +10,6 @@ module.exports = {
       "@stylistic/js/brace-style": ["error", "allman"],
       "@stylistic/js/no-tabs": "error",
       "@stylistic/js/indent": ["error", 3],
+      "@stylistic/js/no-trailing-spaces": ["error"],
    },
 }

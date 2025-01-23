@@ -2,13 +2,13 @@ const { Readable, Writable } = require("stream")
 
 const adminQueue = new Readable({
    objectMode: true,
-   read() 
+   read()
    {}, // The broker shouldn't ever have to read from queue
 })
 
 const adminQueueOut = new Writable({
    objectMode: true,
-   write() 
+   write()
    {},
 })
 

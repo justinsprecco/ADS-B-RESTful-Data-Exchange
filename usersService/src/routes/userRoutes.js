@@ -9,6 +9,7 @@ const {
 const {
    postUser,
    validateUser,
+   getUsers,
    getUser,
    deleteUser,
    updateUser,
@@ -16,7 +17,9 @@ const {
 
 router.post("/", postUser)
 
-router.post('/login', validateUserForm, validateUser)
+router.post('/validate', validateUserForm, validateUser)
+
+router.get("/", verifyAccessToken, getUsers)
 
 router.get("/:id", verifyAccessToken, getUser)
 

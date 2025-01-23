@@ -6,7 +6,7 @@ const { post } = require("axios")
 const { AUTH_URI, AUTH_TOKEN_SECRET } = require("../config")
 const { verify } = require("jsonwebtoken")
 
-exports.verifyAccessToken = async (req, res, next) => 
+exports.verifyAccessToken = async (req, res, next) =>
 {
    const authHeader = req.headers["authorization"]
    if (!authHeader)
@@ -28,7 +28,7 @@ exports.verifyAccessToken = async (req, res, next) =>
          const response = await post(`${AUTH_URI}/verify`, { accessToken })
       */
 
-      const decoded = verify(accessToken, AUTH_TOKEN_SECRET)
+      const decoded = await verify(accessToken, AUTH_TOKEN_SECRET)
 
       if (!decoded)
       {

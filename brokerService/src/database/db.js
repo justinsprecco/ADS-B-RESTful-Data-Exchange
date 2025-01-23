@@ -1,26 +1,32 @@
-const pgp = require("pg-promise")()
+const { connect, connection } = require("mongoose")
 const { DB_URI } = require("../config")
 
-const db = pgp(DB_URI)
-
-const dbConnect = async () => 
+const dbConnect = async () =>
 {
-   try 
+   try
    {
-      const connection = await db.connect()
-      console.log("Connected to the database:", db.$config.options)
-      connection.done() // release the connection
+      await connect(DB_URI)
+      console.log("Connected to MongoDB successfully")
    }
-   catch (error) 
+   catch (error)
    {
-      console.error("Error connecting to the database:", error)
+      console.error("MongoDB connection error:", error)
+      process.exit(1)
    }
 }
 
-const dbDisconnect = () => 
+const dbDisconnect = async () =>
 {
-   pgp.end()
-   console.log("Database connections closed.")
+   try
+   {
+      await connection.close()
+      console.log("MongoDB connection closed gracefully.")
+
+   }
+   catch (error)
+   {
+      console.error("Error during MongoDB shutdown:", error)
+   }
 }
 
-module.exports = { db, dbConnect, dbDisconnect }
+module.exports = { dbConnect, dbDisconnect }

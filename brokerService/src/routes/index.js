@@ -2,7 +2,9 @@ const express = require("express")
 const proxy = require("express-http-proxy")
 const {
    handleStream,
-   getMessages,
+   getAllADSMessages,
+   getLatestADSMessages,
+   getADSMessagesByTime,
    subscribe,
    unsubscribe,
 } = require("../controllers")
@@ -15,7 +17,9 @@ router.all("/users/*", proxy(USER_PROXY))
 router.all("/auth/*", proxy(AUTH_PROXY))
 
 // Message Routes
-router.get("/message", getMessages)
+router.get("/message/ads", getAllADSMessages)
+router.get("/message/ads/latest", getLatestADSMessages)
+router.get("/message/ads/time", getADSMessagesByTime)
 
 // Stream Routes
 router.post("/users/:id/devices/:deviceid/stream", handleStream)

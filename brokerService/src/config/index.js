@@ -5,6 +5,4 @@ exports.PORT = process.env.PORT || 3000
 exports.USER_SOCKET_PORT = process.env.USER_SOCKET_PORT || 3003
 exports.USER_PROXY = process.env.USER_PROXY
 exports.AUTH_PROXY = process.env.AUTH_PROXY
-exports.DB_URI =
-   process.env.DB_URI ||
-   `postgresql://${process.env.ADSDB_USER}:${process.env.ADSDB_PASSWORD}@${process.env.ADSDB_HOST}:${process.env.ADSDB_PORT}/${process.env.ADSDB_DB}`
+exports.DB_URI = process.env.DB_URI

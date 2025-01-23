@@ -7,22 +7,19 @@
 
 const { verify } = require("jsonwebtoken")
 const { AUTH_CODE_SECRET, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = require("../config")
+const Token = require("../models/Token")
 
-const getScope = (scope) =>
+const getScope = async (scope) =>
 {
    const scopeInfo = {
-      admin: { accessExpiry: '30m', refreshExpiry: '60m' },
-      user: { accessExpiry: '20m', refreshExpiry: '60m' }
+      admin: { accessExpiry: '10m', refreshExpiry: '7d' },
+      user: { accessExpiry: '10m', refreshExpiry: '1d' }
    }
 
-   if (scopeInfo[scope]) 
-   {
+   if (scopeInfo[scope])
       return scopeInfo[scope]
-   }
-   else 
-   {
+   else
       throw new Error(`${scope} is an invalid scope!`)
-   }
 }
 
 /*
@@ -30,14 +27,14 @@ const getScope = (scope) =>
 */
 exports.verifyScope = async(req, res, next) =>
 {
-   const { username, scope } = req.body
-   if (!username || !scope) return res.status(400).json({ message: "Header is missing user data!" })
+   const { userId, scope } = req.body
+   if (!userId || !scope) return res.status(400).json({ message: "Header is missing user data!" })
 
-   try 
+   try
    {
-      getScope(scope)
+      await getScope(scope)
 
-      req.body = { username, scope }
+      req.body = { userId, scope }
 
       next()
    }
@@ -57,10 +54,10 @@ exports.verifyAuthCode = async(req, res, next) =>
 
    try
    {
-      const { username, scope } = verify(authCode, AUTH_CODE_SECRET)
-      const { accessExpiry, refreshExpiry } = getScope(scope)
+      const { userId, scope } = verify(authCode, AUTH_CODE_SECRET)
+      const { accessExpiry, refreshExpiry } = await getScope(scope)
 
-      req.body = { username, scope, accessExpiry, refreshExpiry }
+      req.body = { userId, scope, accessExpiry, refreshExpiry }
 
       next()
    }
@@ -75,20 +72,21 @@ exports.verifyAuthCode = async(req, res, next) =>
 */
 exports.verifyRefreshToken = async (req, res, next) =>
 {
-   const { refreshToken } = req.body
+   const { userId, refreshToken } = req.body
    if (!refreshToken) return res.status(400).json({ message: "Missing refresh token!" })
 
    try
    {
-      const {username, scope } = verify(refreshToken, REFRESH_TOKEN_SECRET)
-      const { accessExpiry } = getScope(scope)
+      const { scope } = await Token.validate(userId, refreshToken)
 
-      req.body = { username, scope, accessExpiry }
+      const { accessExpiry } = await getScope(scope)
+
+      req.body = { userId, scope, accessExpiry }
 
       next()
    }
    catch (err)
    {
-      return res.status(401).json({ message: "Invalid or expired refresh token" })
+      return res.status(401).json({ message: err.message })
    }
 }

@@ -4,14 +4,14 @@ const {
    setRequest,
 } = require("../services/socketService")
 
-exports.handleStream = (req, res) => 
+exports.handleStream = (req, res) =>
 {
    const { id: userId, deviceid: deviceId } = req.params
 
    const groundStationSocket = getGroundStationSocket(deviceId)
    const userSocket = getUserSocket(userId)
 
-   if (!groundStationSocket) 
+   if (!groundStationSocket)
    {
       console.log("groundStation Socket Not Found")
       return res
@@ -21,7 +21,7 @@ exports.handleStream = (req, res) =>
          )
    }
 
-   if (!userSocket) 
+   if (!userSocket)
    {
       console.log("Client WebSocket not found")
       return res

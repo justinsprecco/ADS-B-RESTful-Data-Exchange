@@ -5,7 +5,7 @@
    TODO: validate all device routes
 */
 
-exports.validateUserForm = async (req, res, next) => 
+exports.validateUserForm = async (req, res, next) =>
 {
    const { username, password } = req.body
 

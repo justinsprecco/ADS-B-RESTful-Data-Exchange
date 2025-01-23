@@ -1,131 +1,115 @@
-const crypto = require('crypto')
-const { db } = require("../database/db")
+const { Schema, model, startSession } = require("mongoose")
+const { hash, compare } = require("bcryptjs")
+const Device = require("./Device")
 
-exports.postUser = async (username, password) => 
-{
-   const salt = crypto.randomBytes(32).toString('hex')
-   const hash = crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString("hex")
+/*
+The user schema contains the id of a user and the number of
+landings/touchandgo during its entire lifetime for all of its groundstations.
 
-   const query = {
-      text: "INSERT INTO users (username, password, salt) VALUES ($1, $2, $3) RETURNING *",
-      values: [username, hash, salt]
-   }
+numLandings contain the total number of landings (not including touch and go)
+for a user.
 
-   const results = await db.query(query)
-   return results[0]
-
-   // TODO: add code that checks if user already exists!
-
-}
-
-exports.validateUser = async (username, password) => 
-{
-   const salt = await getSalt(username)
-   if (!salt)
+touchAndGo specifically contain the total number of "touch and go" for a
+user.
+*/
+const userSchema = new Schema(
    {
-      throw new Error('User not found in the system.')
+      username: { type: String, required: true },
+      password: { type: String, required: true },
+      devices: [{ type: Schema.Types.ObjectId, ref: "Device" }],
+      numLandings: Number,
+      touchAndGo: Number,
    }
+)
 
-   const hash = crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString("hex")
-
-   const query = {
-      text: "SELECT id FROM users WHERE username=$1 AND password=$2",
-      values: [username, hash]
-   }
-
-   const results = await db.query(query)
-   const user = results[0]
-
-   if (!user) throw new Error("Invalid Password.")
-
-   return user
-}
-
-const getSalt = async(username) => 
+userSchema.pre("save", async function(next)
 {
-
-   const query = {
-      text: "SELECT salt from users WHERE username=$1",
-      values: [username]
-   }
-
-   const results = await db.query(query)
-
-   return results[0].salt
-}
-
-exports.getUser = async (userId) =>
-{
-   const query = {
-      text: 'SELECT username FROM users WHERE id = $1',
-      values: [userId]
-   }
-
-   const results = await db.query(query)
-   const user = results[0]
-
-   if (!user) throw new Error("User doesn't exist.")
-
-   return user
-}
-
-exports.getUsers = async () => 
-{
-   const query = "SELECT username FROM users ORDER BY id ASC"
-   const results = await db.query(query)
-   if (!results) throw new Error("Users could not be retrieved!")
-   return results
-}
-
-// delete '/users/:id'
-// delete user given user id
-exports.deleteUser = async (userId) =>
-{
-   const query = {
-      text: 'DELETE FROM users WHERE id = $1',
-      values: [userId]
-   }
-
-   const results = db.query(query)
-   if (!results) throw new Error("Unable to delete user.")
-}
-
-// put '/users/:id'
-// update user given user id
-exports.updateUser = async (userId, username, password) =>
-{
-
-   const salt = crypto.randomBytes(32).toString('hex')
-   const hash = crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString("hex")
-
-   const queries = [
-      {
-         text: "UPDATE users SET username=$2, password=$3, salt=$4 WHERE id = $1",
-         values: [id, username, hash, salt]
-      },
-      {
-         text: "UPDATE users SET username=$2 WHERE id = $1",
-         values: [id, username]
-      },
-      {
-         text: "UPDATE users SET password=$2, salt=$3 WHERE id = $1",
-         values: [id, hash, salt]
-      }
-   ]
-
-   let results = null
-   if (username && password)
+   const user = this
+   if (user.isModified("password"))
    {
-      results = await db.query(queries[0])
+      const hashedPassword = await hash(this.password, 8)
+      user.password = hashedPassword
    }
-   else if (username)
-   {
-      results = await db.query(queries[1])
-   }
-   else if (password)
-   {
-      results = await db.query(queries[2])
-   }
+   next()
+})
 
-   return results
+userSchema.statics.create = async function(username, password)
+{
+   const existingUser = await this.findOne({ username })
+   if (existingUser) throw new Error("Username already exists")
+
+   const user = new this({ username, password })
+   await user.save()
+   return { user }
 }
+
+userSchema.statics.validate = async function(username, password)
+{
+   const user = await this.findOne({ username })
+   if (!user) throw new Error("User not found")
+
+   const isMatch = await compare(password, user.password)
+   if (!isMatch) throw new Error("Invalid password")
+
+   return { userId: user._id }
+}
+
+userSchema.statics.getById = async function(userId)
+{
+   console.log(userId)
+   const user = await this.findById(userId).select('username devices')
+   if (!user) throw new Error("User not found")
+   return { user }
+}
+
+userSchema.statics.getAll = async function()
+{
+   const users = await this.find({}).select('_id username devices')
+   if (!users.length) throw new Error("No users exist")
+   return { users }
+}
+
+userSchema.statics.delete = async function(userId)
+{
+   const session = await startSession()
+
+   try
+   {
+      session.startTransaction()
+      const user = await this.findByIdAndDelete(userId).session(session)
+      if (!user) throw new Error("User not found")
+
+      await Device.deleteMany({ userId }).session(session)
+
+      await session.commitTransaction()
+      return { userId: user._id }
+   }
+   catch (error)
+   {
+      await session.abortTransaction()
+      throw error
+   }
+   finally
+   {
+      session.endSession()
+   }
+}
+
+userSchema.statics.update = async function(userId, username, password)
+{
+   const user = await this.findById(userId)
+   if (!user) throw new Error("User not found")
+
+   if (!username && !password) throw new Error("Username and/or password not provided")
+
+   if (username !== undefined) user.username = username
+   if (password !== undefined) user.password = password
+
+   await user.save()
+
+   return { user }
+}
+
+const User = model("User", userSchema)
+
+module.exports = User

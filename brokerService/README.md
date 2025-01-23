@@ -7,7 +7,6 @@
 - [Building From Source](#building-from-source)
   - [Prerequisites](#prerequisites)
   - [Configuring Environment](#configuring-environment)
-  - [Database Setup](#database-setup)
   - [Running](#running)
 
 <!--toc:end-->
@@ -19,7 +18,7 @@
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/download/) (v20.11.1 or above)
-- [PostgreSQL](https://www.postgresql.org/download/) (v14.13 or above)
+- [MongoDB](https://www.mongodb.com/try/download/community) (v8.0.4 or above)
 
 Begin by cloning the repo:
 
@@ -43,18 +42,8 @@ USER_SOCKET_PORT=[user_server_port]
 USER_PROXY=[user_service_host]
 AUTH_PROXY=[oauth_service_host]
 
-ADSDB_USER=[db_username]
-ADSDB_HOST=[db_hostname]
-ADSDB_DB=[db_name]
-ADSDB_PASSWORD=[db_password]
-ADSDB_PORT=[db_port]
+DB_URI=[mongo_uri]
 ```
-
-### Database Setup
-
-1. Create database user: `createuser [USER]`
-1. Create database: `createdb [DB_NAME]`
-1. Create database tables: `psql -U [USER] -d [DB_NAME] -f src/database/adsb_table.sql`
 
 ### Running
 

@@ -1,7 +1,7 @@
 const http = require("http")
 const app = require("./app")
 const { PORT } = require("./config")
-const { dbConnect, dbDisconnect } = require("./database/db")
+const { dbConnect } = require("./database/db")
 const { openSocketConnections, closeSocketConnections } = require("./services/socketService")
 
 // HTTP Server
@@ -15,7 +15,7 @@ openSocketConnections(server)
 server.listen(PORT, () => console.log(`Broker service running on port ${PORT}`))
 
 // Clean shutdown logic
-const shutdown = async () => 
+const shutdown = async () =>
 {
    console.log("\nGracefully shutting down...")
 
@@ -24,7 +24,6 @@ const shutdown = async () =>
    server.close()
    console.log("HTTP server closed.")
 
-   dbDisconnect()
    process.exit(0)
 }
 

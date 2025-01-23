@@ -1,6 +1,8 @@
 const express = require("express")
 const router = express.Router()
 
+const { verifyAccessToken } = require("../middleware")
+
 const {
    postDevice,
    getDevices,
@@ -9,14 +11,14 @@ const {
    updateDevice,
 } = require("../controllers")
 
-router.post("/:id/devices", postDevice)
+router.post("/:id/devices", verifyAccessToken, postDevice)
 
-router.get("/:id/devices", getDevices)
+router.get("/:id/devices", verifyAccessToken, getDevices)
 
-router.get("/:id/devices/:deviceid", getDevice)
+router.get("/:id/devices/:deviceId", verifyAccessToken, getDevice)
 
-router.delete("/:id/devices/:deviceid", deleteDevice)
+router.delete("/:id/devices/:deviceId", verifyAccessToken, deleteDevice)
 
-router.put("/:id/devices/:deviceid", updateDevice)
+router.put("/:id/devices/:deviceId", verifyAccessToken, updateDevice)
 
 module.exports = router

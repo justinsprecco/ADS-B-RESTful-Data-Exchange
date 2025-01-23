@@ -1,4 +1,5 @@
-const Device = require("../models/Device.js")
+const Device = require("../models/Device")
+const User = require("../models/User")
 
 // post "/users/:id/devices"
 // input a new device tied to user id
@@ -6,37 +7,43 @@ exports.postDevice = async (req, res) =>
 {
    try
    {
-      const id = parseInt(req.params.id)
+
+      const userId = req.params.id
       const { macAddress, latitude, longitude } = req.body
+
+      const { user } = await User.getById(userId)
 
       // NOTE: should get macAddress / identifier from somewhere else???
 
-      const device = await Device.postDevice(macAddress, latitude, longitude)
+      const { device } = await Device.create(user._id, macAddress, latitude, longitude)
 
-      return res.status(201).json({ message: `Device ${macAddress} added with id ${device.id} and associated with user ${id}` })
+      return res.status(201).json({ message: `Device ${device.macAddress} added with id ${device._id} and associated with user ${device.userId}` })
    }
    catch (err)
    {
-      return res.status(500).json({ message: "Error: device registration failed" + err })
+      const status = err.message === "User not found" ? 404 : err.message === "Device already exists" ? 409 : 500
+      return res.status(status).json({ message: err.message })
    }
 }
 
-// get "/users/:id/devices?limit=<param>&start[< "l,g" + "e, ">]=<param>"
-// get devices from a user given query
-// Q: so this query will only be for a specific user?
+// get "/users/:id/devices"
+// get all devices from a user given query
 exports.getDevices = async (req, res) =>
 {
    try
    {
-      const userId = parseInt(req.params.id)
+      const userId = req.params.id
 
-      const devices = await Device.getDevices(userId)
+      const { user } = await User.getById(userId)
 
-      return res.status(200).json({ message: devices })
+      const { devices } = await Device.getByUserId(userId)
+
+      return res.status(200).json({ devices })
    }
    catch (err)
    {
-      return res.status(500).json({ message: "Error: failed to get devices" + err })
+      const status = err.message === "No devices found for this user" ? 404 : err.message === "User not found" ? 404 : 500
+      return res.status(status).json({ message: err.message })
    }
 }
 
@@ -46,16 +53,16 @@ exports.getDevice = async (req, res) =>
 {
    try
    {
-      const userId = parseInt(req.params.id)
-      const deviceid = parseInt(req.params.deviceid)
+      const { deviceId } = req.params
 
-      const device = await Device.getDevice(userId, deviceId)
+      const { device } = await Device.getById(deviceId)
 
-      return res.status(200).json({ message: device })
+      return res.status(200).json({ device })
    }
    catch (err)
    {
-      return res.status(500).json({ message: "Error: failed getting device" + err })
+      const status = err.message === "Device not found" ? 404 : 500
+      return res.status(status).json({ message: err.message })
    }
 }
 
@@ -65,16 +72,16 @@ exports.deleteDevice = async (req, res) =>
 {
    try
    {
-      const userId = parseInt(req.params.id)
-      const deviceid = parseInt(req.params.deviceid)
+      const { deviceId } = req.params
 
-      await Device.deleteDevice(userId, deviceId)
+      await Device.delete(deviceId)
 
-      return res.status(200).json({ message: `device ${deviceid} deleted.` })
+      return res.status(200).json({ message: `Device ${deviceId} deleted successfully.` })
    }
    catch (err)
    {
-      return res.status(500).json({ message: `Error: Unable to delete device ${deviceid}.` + err })
+      const status = err.message === "Device not found" ? 404 : 500
+      return res.status(status).json({ message: err.message })
    }
 }
 
@@ -84,21 +91,17 @@ exports.updateDevice = async (req, res) =>
 {
    try
    {
-      const userId = parseInt(req.params.id)
-      const deviceid = parseInt(req.params.deviceid)
+      const { deviceId } = req.params
       const { latitude, longitude } = req.body
 
-      const results = await Device.updateDevice(userId, deviceId, latitude, longitude)
+      console.log(deviceId)
+      const { device } = await Device.update(deviceId, latitude, longitude)
 
-      if (!results)
-      {
-         return res.status(402).json({ message: "Include latitude or longitude in body to update" })
-      }
-
-      return res.status(200).json({ message: `Device ${deviceid} updated.` })
+      return res.status(200).json({ message: `Device ${device._id} updated successfully.` })
    }
    catch (err)
    {
-      return res.status(500).json({ message: "Error: Unable to update device." + err })
+      const status = err.message === "Device not found" ? 404 : err.message === "Latitude and/or longitude not provided" ? 400 : 500
+      return res.status(status).json({ message: err.message })
    }
 }

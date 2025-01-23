@@ -1,5 +1,4 @@
 const User = require("../models/User.js")
-const { post } = require("axios")
 
 // post "/users"
 // create user
@@ -9,13 +8,14 @@ exports.postUser = async (req, res) =>
 
    try
    {
-      const user = await User.postUser(username, password)
+      const { user } = await User.create(username, password)
 
-      return res.status(201).json({ message: `User added with ID: ${user.id}` })
+      return res.status(201).json({ message: `User ${user.username} created successfully with ID: ${user._id}`})
    }
-   catch (err) 
+   catch (err)
    {
-      return res.status(500).json({ message: "Error: User registration failed: " + err })
+      const status = err.message === "Username already exists" ? 409 : 500
+      return res.status(status).json({ message: err.message })
    }
 }
 
@@ -27,32 +27,29 @@ exports.validateUser = async (req, res) =>
 
    try
    {
-      const user = await User.validateUser(username, password)
-      if (!user) 
-      {
-         return res.status(401).json({ message: "Invalid username or password" })
-      }
+      const { userId } = await User.validate(username, password)
 
       return res.status(200).json({ message: "User credentials validated successfully" })
    }
    catch (err)
    {
-      return res.status(500).json({ message: "Error: User login failed. " + err })
+      const status = err.message === "User not found" ? 404 : err.message === "Invalid password" ? 401 : 500
+      return res.status(status).json({ message: err.message })
    }
 }
 
-// get "/users?limit=<param>&start[< "l,g" + "e, ">]=<param>"
-// the below code will just return ALL users.
+// get "/users"
 exports.getUsers = async (req, res) =>
 {
    try
    {
-      const users = await User.getUsers()
-      return res.status(200).json(users)
+      const { users } = await User.getAll()
+      return res.status(200).json({ users })
    }
    catch (err)
    {
-      return res.status(500).json({ message: "Error: Unable to retrieve user list." + err })
+      const status = err.message === "No users exist" ? 404 : 500
+      return res.status(status).json({ message: err.message })
    }
 }
 
@@ -60,17 +57,18 @@ exports.getUsers = async (req, res) =>
 // get user given user id
 exports.getUser = async (req, res) =>
 {
-   try 
+   try
    {
-      const id = parseInt(req.params.id)
+      const userId = req.params.id
 
-      const user = await User.getUser(id)
+      const { user } = await User.getById(userId)
 
-      return res.status(200).json(user)
+      return res.status(200).json({ user })
    }
    catch (err)
    {
-      return res.status(500).json({ message: "Error: Unable to retrieve user." + err })
+      const status = err.message === "User not found" ? 404 : 500
+      return res.status(status).json({ message: err.message })
    }
 
 }
@@ -81,15 +79,16 @@ exports.deleteUser = async (req, res) =>
 {
    try
    {
-      const id = parseInt(req.params.id)
+      const id = req.params.id
 
-      await User.deleteUser(id)
+      const { userId } = await User.delete(id)
 
-      return res.status(200).json({ message: `user ${id} deleted.` })
+      return res.status(200).json({ message: `User ${userId} deleted successfully.` })
    }
    catch (err)
    {
-      return res.status(500).json({ message: "Error: Unable to delete user." + err })
+      const status = err.message === "User not found" ? 404 : 500
+      return res.status(status).json({ message: err.message })
    }
 }
 
@@ -99,21 +98,16 @@ exports.updateUser = async (req, res) =>
 {
    try
    {
-      const id = parseInt(req.params.id)
+      const id = req.params.id
       const { username, password } = req.body
 
-      const results = await User.updateUser(id, username, password)
+      const { user } = await User.update(id, username, password)
 
-      if (!results) 
-      {
-         return res.status(402).json({ message: "Include username or password in body to update" })
-      }
-
-      return res.status(200).json({ message: `User ${id} updated.` })
+      return res.status(200).json({ message: `User ${user._id} updated successfully.` })
    }
    catch (err)
    {
-      return res.status(500).json({ message: "Error: Unable to update user." + err })
+      const status = err.message === "User not found" ? 404 : err.message === "Username and/or password not provided" ? 400 : 500
+      return res.status(status).json({ message: err.message })
    }
-
 }
