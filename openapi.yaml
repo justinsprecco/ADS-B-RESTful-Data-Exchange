@@ -1,0 +1,8 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: ADS-B RESTful Data Exchange API
+  description: An ADS-B RESTful Data Exchange API
+  x-logo:
+    url: 'https://sagetech.com/wp-content/uploads/2024/07/Sagetech_logo_color_WEBSITE.svg'
+    altText: Sagetech logo
