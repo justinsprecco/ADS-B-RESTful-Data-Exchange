@@ -1,19 +1,22 @@
 const WebSocket = require("ws")
 const { adminQueue } = require("./adminQueue")
-const { USER_SOCKET_PORT } = require("../config")
+const { USER_SOCKET_PORT, FUZZY_SOCKET_PORT } = require("../config")
 const { ADSMessage } = require("../models/Message")
 
 const activeUserRequests = new Map()
 
-let stationSocketServ, usersSocketServ
+let stationSocketServ, usersSocketServ, fuzzySocketServ
+let fuzzyClient
 
 function openSocketConnections(server)
 {
    stationSocketServ = new WebSocket.Server({ server })
    usersSocketServ = new WebSocket.Server({ port: USER_SOCKET_PORT })
+   fuzzySocketServ = new WebSocket.Server({ port: FUZZY_SOCKET_PORT })
 
    stationSocketServ.on("connection", handleStationConnection)
    usersSocketServ.on("connection", handleUserConection)
+   fuzzySocketServ.on("connection", handleFuzzyConnection)
 }
 
 const closeWebSocketServer = async(server, name) =>
@@ -27,7 +30,8 @@ const closeSocketConnections = async() =>
 {
    await Promise.all([
       closeWebSocketServer(stationSocketServ, "Groundstation"),
-      closeWebSocketServer(usersSocketServ, "User")
+      closeWebSocketServer(usersSocketServ, "User"),
+      closeWebSocketServer(fuzzySocketServ, "Fuzzy")
    ])
 }
 
@@ -45,6 +49,18 @@ function handleUserConection(ws)
    ws.on("close", () => console.log(`User socket closed for id: ${ws.userId}`))
 }
 
+function handleFuzzyConnection(ws)
+{
+   fuzzyClient = ws
+   console.log("Fuzzy Service connection established.")
+   ws.on("message", (message) => processFuzzyMessage(ws, message))
+   ws.on("close", () =>
+   {
+      fuzzyClient = null
+      console.log(`Fuzzy Service connection closed`)
+   })
+}
+
 const processStationMessage = async(ws, message)  =>
 {
    const data = JSON.parse(message)
@@ -59,6 +75,7 @@ const processStationMessage = async(ws, message)  =>
    }
    else
    {
+      fuzzyClient.send(message)
       forwardToUsers(data.stationId, data)
       adminQueue.push(data)
       const buffer = Buffer.from(data.message)
@@ -79,6 +96,21 @@ function processUserMessage(ws, message)
          console.log("userId is undefined")
          ws.close()
       }
+   }
+}
+
+const processFuzzyMessage = async(ws, message)  =>
+{
+   const data = JSON.parse(message)
+   console.log("Received message:", data)
+
+   if (data.type === "init")
+   {
+      console.log("Socket init signal received")
+   }
+   else
+   {
+      console.log(`Plane landed on runway ${data.runway}`)
    }
 }
 

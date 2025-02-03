@@ -53,7 +53,9 @@ exports.getDevice = async (req, res) =>
 {
    try
    {
-      const { deviceId } = req.params
+      const { userId: id, deviceId } = req.params
+
+      await User.getById(userId)
 
       const { device } = await Device.getById(deviceId)
 
@@ -61,7 +63,7 @@ exports.getDevice = async (req, res) =>
    }
    catch (err)
    {
-      const status = err.message === "Device not found" ? 404 : 500
+      const status = err.message === "Device not found" || err.message === "User not found" ? 404 : 500
       return res.status(status).json({ message: err.message })
    }
 }
@@ -72,7 +74,9 @@ exports.deleteDevice = async (req, res) =>
 {
    try
    {
-      const { deviceId } = req.params
+      const { userId: id, deviceId } = req.params
+
+      await User.getById(userId)
 
       await Device.delete(deviceId)
 
@@ -80,7 +84,7 @@ exports.deleteDevice = async (req, res) =>
    }
    catch (err)
    {
-      const status = err.message === "Device not found" ? 404 : 500
+      const status = err.message === "Device not found" || err.message === "User not found" ? 404 : 500
       return res.status(status).json({ message: err.message })
    }
 }
@@ -91,8 +95,10 @@ exports.updateDevice = async (req, res) =>
 {
    try
    {
-      const { deviceId } = req.params
+      const { userId: id, deviceId } = req.params
       const { latitude, longitude } = req.body
+
+      await User.getById(userId)
 
       console.log(deviceId)
       const { device } = await Device.update(deviceId, latitude, longitude)
@@ -101,7 +107,7 @@ exports.updateDevice = async (req, res) =>
    }
    catch (err)
    {
-      const status = err.message === "Device not found" ? 404 : err.message === "Latitude and/or longitude not provided" ? 400 : 500
+      const status = err.message === "Device not found" || err.message === "User not found" ? 404 : err.message === "Latitude and/or longitude not provided" ? 400 : 500
       return res.status(status).json({ message: err.message })
    }
 }

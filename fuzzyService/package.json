@@ -1,0 +1,20 @@
+{
+  "name": "ads-b-restful-data-exchange-fuzzy",
+  "version": "1.0.0",
+  "description": "Fuzzy service for ADSB RESTful Data Exchange",
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "lint": "eslint . --fix",
+    "test": "jest"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9"
+  }
+}

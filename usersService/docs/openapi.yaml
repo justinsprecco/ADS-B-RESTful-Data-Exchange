@@ -1,22 +1,19 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   version: 1.0.0
-  title: ADS-B RESTful Data Exchange User API
+  title: ADS-B RESTful Data Exchange User Service
   description: API documentation for the ADS-B RESTful Data Exchange User Service
-servers:
-  - url: http://localhost:3001
 tags:
- - name: User
+ - name: users
    description: User management
- - name: Device
+ - name: devices
    description: Device management
-
 
 paths:
   /users:
     post:
       tags:
-        - User
+        - users
       summary: Create a new user
       description: Registers a new user and returns the created user ID.
       requestBody:
@@ -24,7 +21,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: testUser
+                password:
+                  type: string
+                  example: password
+              required:
+                - username
+                - password
       responses:
         201:
           description: User created successfully.
@@ -36,15 +43,128 @@ paths:
                   message:
                     type: string
               example:
-                message: "User added with ID: 1"
+                message: "User added with ID: 60d2f1f3b3c5e25d12d34abc"
+        409:
+          description: Username already exists.
         500:
           description: Error during user registration.
 
+    get:
+      tags:
+        - users
+      summary: Get all users
+      description: Gets all users registered in the database.
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        404:
+          description: No users exist.
+        500:
+          description: Error getting users.
+
+  /users/{id}:
+    get:
+      tags:
+        - users
+      summary: Get user by id
+      description: Gets a specified user by id.
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: A registered user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        404:
+          description: User not found.
+        500:
+          description: Error getting user.
+
+    delete:
+      tags:
+        - users
+      summary: Delete user by id
+      description: Deletes a specified user by id.
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: User deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "User 60d2f1f3b3c5e25d12d34abc deleted successfully."
+        404:
+          description: User not found.
+        500:
+          description: Error deleting user.
+
+    put:
+      tags:
+        - users
+      summary: Update user by id
+      description: Updates a specified user's latitude/longitude.
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: updatedUser
+                password:
+                  type: string
+                  example: updatedPassword
+            required: []
+            oneOf:
+              - required: ["username"]
+              - required: ["password"]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "User 60d2f1f3b3c5e25d12d34abc updated successfully."
+        404:
+          description: User not found.
+        500:
+          description: Error updating user.
 
   /users/validate:
     post:
       tags:
-        - User
+        - users
       summary: Verify a User
       description: Checks for the given username and password, validating for login.
       operationId: validateUser
@@ -53,7 +173,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: testUser
+                password:
+                  type: string
+                  example: password
+              required:
+                - username
+                - password
       responses:
         200:
           description: User verified successfully.
@@ -66,34 +196,43 @@ paths:
                     type: string
               example:
                 message: User credentials validated successfully
-        400:
-          description: Missing properties.
+        404:
+          description: User not found.
         401:
-          description: Wrong username or password.
+          description: Invalid password.
         500:
           description: Error during validation.
-
 
   /users/{id}/devices:
     post:
       tags:
-        - Devices
+        - devices
       summary: Add a new device
-      description: Registers a new device and returns the created device ID.
+      description: Registers a new device.
       parameters:
-        - name: id
-          in: path
-          required: true
-          description: The ID of the user
-          schema:
-            type: integer
-            example: 1
+        - $ref: "#/components/parameters/UserId"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Device'
+              type: object
+              properties:
+                macAddress:
+                  type: string
+                  example: 01:a2:b3:c4:d5:e6
+                latitude:
+                  type: float
+                  example: 45.731560
+                longitude:
+                  type: float
+                  example: -122.636872
+              required:
+                - macAddress
+                - latitude
+                - longitude
+      security:
+        - BearerAuth: []
       responses:
         201:
           description: Device added successfully.
@@ -105,16 +244,171 @@ paths:
                   message:
                     type: string
               example:
-                message: "Device 01:a2:b3:c4:d5:e6 added with id 1 and associated with user 1"
+                message: "Device 01:a2:b3:c4:d5:e6 added with id 60d2f1f3b3d34dk4l2d0 and associated with user 60d2f1f3b3c5e25d12d34abc"
+        404:
+          description: User not Found.
+        409:
+          description: Device already exists
+        500:
+          description: Error during device registration.
+    get:
+      tags:
+        - devices
+      summary: Gets all devices
+      description: Gets all device for a given user.
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+        - name: id
+          in: path
+          required: true
+          description: The ID of the user
+          schema:
+            type: string
+            example: 60d2f1f3b3c5e25d12d34abc
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: A list of devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Device"
+        404:
+          description: User not Found or no devices exist.
+        500:
+          description: Error getting devices.
+
+  /users/{id}/devices{deviceId}:
+    get:
+      tags:
+        - devices
+      summary: Get a device
+      description: Gets a device by id.
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+        - $ref: "#/components/parameters/DeviceId"
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: A registered device.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        404:
+          description: User/Device not Found.
         500:
           description: Error during device registration.
 
+    delete:
+      tags:
+        - devices
+      summary: Delete a device
+      description: Deletes a device by id.
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+        - $ref: "#/components/parameters/DeviceId"
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Device deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Device 60d2f1f3b3d34dk4l2d0 deleted successfully."
+        404:
+          description: User/Device not Found.
+        500:
+          description: Error deleting device.
+
+    put:
+      tags:
+        - devices
+      summary: Updates a device
+      description: Updates a device's latitude/longitude by id.
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+        - $ref: "#/components/parameters/DeviceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                latitude:
+                  type: float
+                  example: 45.721810
+                password:
+                  type: float
+                  example: -121.472375
+            required: []
+            oneOf:
+              - required: ["latitude"]
+              - required: ["longitude"]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Device updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Device 60d2f1f3b3d34dk4l2d0 updated successfully."
+        404:
+          description: User/Device not Found.
+        500:
+          description: Error updating device.
 
 components:
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: The ID of the user
+      schema:
+        type: string
+        example: 60d2f1f3b3c5e25d12d34abc
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      description: The ID of the device
+      schema:
+        type: string
+        example: 60d2f1f3b3d34dk4l2d0
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     User:
       type: object
       properties:
+        _id:
+          type: string
+          format: objectId
+          example: 60d2f1f3b3c5e25d12d34abc
+          description: The unique id for the user.
         username:
           type: string
           example: testUser
@@ -123,18 +417,33 @@ components:
           type: string
           example: password
           description: The password for the user.
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/Device"
+
     Device:
       type: object
       properties:
+        _id:
+          type: string
+          format: objectId
+          example: 60d2f1f3b3d34dk4l2d0
+          description: The unique id for the device.
+        userId:
+          type: string
+          format: objectId
+          example: 60d2f1f3b3c5e25d12d34abc
+          description: The id of the registered user.
         macAddress:
           type: string
           example: 01:a2:b3:c4:d5:e6
           description: The mac address of the device.
         latitude:
           type: float
-          example: 38.8951
+          example: 45.731560
           description: The latitude where the device is located.
         longitude:
           type: float
-          example: -77.0364
+          example: -122.636872
           description: The longitude where the device is located.
