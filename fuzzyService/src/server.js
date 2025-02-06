@@ -1,21 +1,49 @@
 const WebSocket = require("ws")
 const { BROKER_SOCKET_SERV } = require("./config")
-const runwayController = require("./controllers/runwayController")
+const messageController = require("./controllers/messageController")
 
-const ws = new WebSocket(BROKER_SOCKET_SERV)
+let ws
+let isConnected = false
+let messageQueue = []
+let reconnectInterval = 5000
 
-ws.on("open", () =>
+const connectWebSocket = () =>
 {
-   console.log("Broker connection established.")
-})
+   console.log("Connecting to broker...")
+   ws = new WebSocket(BROKER_SOCKET_SERV)
 
-ws.on("message", (message) =>
-{
-   const data = JSON.parse(message)
-   runwayController(ws, data.message)
-})
+   ws.on("open", () =>
+   {
+      console.log("Broker connection established.")
+      isConnected = true
 
-ws.on("close", () =>
-{
-   console.log("Broker connection closed")
-})
+      while (messageQueue.length > 0)
+      {
+         const message = messageQueue.shift()
+         processMessage(message)
+      }
+   })
+
+   ws.on("message", (message) =>
+   {
+      if (!isConnected) messageQueue.push(message)
+      else processMessage(message)
+   })
+
+   ws.on("close", () =>
+   {
+      console.log("Broker connection closed. Reconnecting in 5 seconds...")
+      isConnected = false
+      setTimeout(connectWebSocket, reconnectInterval)
+   })
+
+   ws.on("error", (err) =>
+   {
+      console.error(`WebSocket error: ${err.message}`)
+      ws.close()
+   })
+}
+
+const processMessage = (message) => messageController(ws, message)
+
+connectWebSocket()
