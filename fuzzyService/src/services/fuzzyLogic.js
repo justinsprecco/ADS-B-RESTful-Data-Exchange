@@ -9,11 +9,11 @@ function determineLanding(current, previous)
 
 const fuzzyLogic = async(message) =>
 {
-   const { icaoAddress } = message
+   const { participant } = message
 
-   const previousState = planeStates.get(icaoAddress) || null
+   const previousState = planeStates.get(participant.address) || null
 
-   planeStates.set(icaoAddress, message)
+   planeStates.set(participant.address, message)
 
    return determineLanding(message, previousState)
 

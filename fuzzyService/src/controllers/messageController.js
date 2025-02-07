@@ -1,6 +1,7 @@
-const adsDecoder = require("../services/adsDecoder")
 const fuzzyLogic = require("../services/fuzzyLogic")
 const getRunway = require("../services/runwayFinder")
+const stateVectorDecoder = require("../services/stateVectorDecoder")
+const { stateVectorParser } = require("../parsers")
 const { hexToBin } = require("../utils")
 
 module.exports = async(ws, message) =>
@@ -9,7 +10,17 @@ module.exports = async(ws, message) =>
 
    const binMessage = hexToBin(message)
 
-   const decodedMessage = adsDecoder(binMessage.slice(32))
+   const messageType = parseInt(binMessage.slice(8, 16), 2)
+   const payload = binMessage.slice(32)
+
+   // Only decoding state vectors
+   if (messageType != 145)
+      return
+
+   const parsedMessage = stateVectorParser(payload)
+   const decodedMessage = stateVectorDecoder(parsedMessage)
+
+   console.log(`Decoded Message: ${JSON.stringify(decodedMessage)}`)
 
    if (!decodedMessage) return
 

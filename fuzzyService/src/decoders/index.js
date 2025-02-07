@@ -13,13 +13,14 @@ const addressDecoder = (participantAddress, addressQualifier) =>
    switch (parseInt(addressQualifier))
    {
    case 0: type = "ICAO"; category = "Unknown"; break
-   case 1: type = "Non-ICAO" ;category = "Unknown"; break
-   case 2: type = "ICAO" ;category = "Aircraft"; break
-   case 3: type = "Non-ICAO" ;category = "Aircraft"; break
-   case 4: type = "ICAO" ;category = "Surface Vehicle"; break
-   case 5: type = "Non-ICAO" ;category = "Surface Vehicle"; break
-   case 32: type = "Obstruction" ;category = null; break
-   case 129: type = "Duplicate" ;category = null; break
+   case 1: type = "Non-ICAO"; category = "Unknown"; break
+   case 2: type = "ICAO"; category = "Aircraft"; break
+   case 3: type = "Non-ICAO"; category = "Aircraft"; break
+   case 4: type = "ICAO"; category = "Surface Vehicle"; break
+   case 5: type = "Non-ICAO"; category = "Surface Vehicle"; break
+   case 32: type = "Obstruction"; category = undefined; break
+   case 129: type = "Duplicate"; category = undefined; break
+   default: type = undefined; category = undefined; break
    }
 
    return { address, type, category }
@@ -38,7 +39,7 @@ const groundSpeedDecoder = (vector) =>
    else if (94 < movement <= 108) return 70 + movement * 2.00
    else if (109 < movement <= 123) return 100 + movement * 5.00
    else if (movement == 124) return 175 + movement
-   else return null
+   else return undefined
 }
 
 const nicDecoder = (vector) =>
@@ -46,43 +47,43 @@ const nicDecoder = (vector) =>
    const nic = parseInt(vector, 2)
    switch (nic)
    {
-   case 0: null; break
-   case 1: return 37040; break
-   case 2: return 14816; break
-   case 3: return 7408; break
-   case 4: return 3704; break
-   case 5: return 1852; break
-   case 6: return 1111.2; break
-   case 7: return 370.4; break
-   case 8: return 370.4; break
-   case 9: return 75; break
-   case 10: return 25; break
-   case 11: return 7.5; break
-   case 22: return 0.3; break
-   default: return null; break
+   case 0: return undefined
+   case 1: return 37040
+   case 2: return 14816
+   case 3: return 7408
+   case 4: return 3704
+   case 5: return 1852
+   case 6: return 1111.2
+   case 7: return 370.4
+   case 8: return 370.4
+   case 9: return 75
+   case 10: return 25
+   case 11: return 7.5
+   case 22: return 0.3
+   default: return undefined
    }
 }
 
 const surveillanceDecoder = (vector) =>
 {
-   let status, intent
+   let status, changed
 
    switch (parseInt(vector.slice(0,4), 2))
    {
-   case 2: status = "Emergency" ;break
-   case 4: status = "Temporary" ;break
-   case 6: status = "SPI" ;break
-   default: status = null ;break
+   case 2: status = "Emergency"; break
+   case 4: status = "Temporary"; break
+   case 6: status = "SPI" ; break
+   default: status = undefined; break
    }
 
    switch (parseInt(vector.slice(4), 2))
    {
-   case 0: intent = "Unchanged"; break
-   case 2: intent = "Changed"; break
-   default: intent = null; break
+   case 0: changed = false; break
+   case 2: changed = true; break
+   default: changed = undefined; break
    }
 
-   return { status, intent }
+   return { status, changed }
 }
 
 const reportModeDecoder =  (vector) =>
@@ -91,7 +92,7 @@ const reportModeDecoder =  (vector) =>
    {
    case 1: return "Acquisition"
    case 2: return "Track"
-   default: return null
+   default: return undefined
    }
 }
 

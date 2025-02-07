@@ -20,14 +20,14 @@ const connectWebSocket = () =>
       while (messageQueue.length > 0)
       {
          const message = messageQueue.shift()
-         processMessage(message)
+         messageController(ws, message)
       }
    })
 
    ws.on("message", (message) =>
    {
       if (!isConnected) messageQueue.push(message)
-      else processMessage(message)
+      else messageController(ws, message)
    })
 
    ws.on("close", () =>
@@ -43,7 +43,5 @@ const connectWebSocket = () =>
       ws.close()
    })
 }
-
-const processMessage = (message) => messageController(ws, message)
 
 connectWebSocket()
