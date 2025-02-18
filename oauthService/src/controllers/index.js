@@ -49,7 +49,7 @@ exports.generateTokens = async (req, res) =>
       let refreshToken = null
       if (!req.isBroker)
       {
-         const refreshToken = await sign(payload, REFRESH_TOKEN_SECRET, refreshOptions)
+         refreshToken = await sign(payload, REFRESH_TOKEN_SECRET, refreshOptions)
 
          const { iat, exp } = await decode(refreshToken, REFRESH_TOKEN_SECRET)
          const issuedAt = new Date(iat * 1000)
