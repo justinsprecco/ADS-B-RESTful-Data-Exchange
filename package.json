@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Sagetech Capstone Project",
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix brokerService\" \"npm run dev --prefix usersService\" \"npm run dev --prefix oauthService\"",
+    "dev": "concurrently \"npm run dev --prefix brokerService\" \"npm run dev --prefix usersService\" \"npm run dev --prefix oauthService \" \"npm run dev --prefix fuzzyService \"",
     "lint": "eslint . --fix",
     "test": "jest",
-    "install-all": "npm install && concurrently \"npm install --prefix brokerService\" \"npm install --prefix usersService\" \"npm install --prefix oauthService\""
+    "install-all": "npm install && concurrently \"npm install --prefix brokerService\" \"npm install --prefix usersService\" \"npm install --prefix oauthService\"",
+    "docs": "jsdoc -c jsdoc.json"
   },
   "author": "",
   "license": "ISC",

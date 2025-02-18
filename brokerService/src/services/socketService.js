@@ -1,7 +1,8 @@
 const WebSocket = require("ws")
 const { adminQueue } = require("./adminQueue")
-const { USER_SOCKET_PORT, FUZZY_SOCKET_PORT } = require("../config")
+const { USER_SOCKET_PORT, FUZZY_SOCKET_PORT, USER_PROXY, AUTH_PROXY, BROKER_SECRET } = require("../config")
 const { ADSMessage } = require("../models/Message")
+const axios = require("axios")
 
 const activeUserRequests = new Map()
 
@@ -70,15 +71,35 @@ const processStationMessage = async(ws, message)  =>
 
    if (data.type === "init")
    {
-      console.log("Socket init signal received")
+      console.log("Socket init signal received. Sending lat/lon")
       ws.stationId = data.stationId
+
+      try
+      {
+         const authToken = await getAuthToken()
+         const { latitude, longitude } = await fetchDevice(data.stationId, authToken)
+
+         console.log(`Sending lat/lon: ${latitude}/${longitude}`)
+
+         ws.send(JSON.stringify({ latitude, longitude }))
+      }
+
+      catch (error)
+      {
+         if (error.status == 404)
+            ws.send("Device not found in the data exchange")
+         else
+            ws.send(error.message)
+
+         console.log(error.message)
+      }
    }
    else
    {
-      fuzzyClient.send(message)
+      const buffer = Buffer.from(data.message, "hex")
+      if (fuzzyClient) fuzzyClient.send(buffer)
       forwardToUsers(data.stationId, data)
       adminQueue.push(data)
-      const buffer = Buffer.from(data.message)
       const timestamp = new Date(data.timestamp)
       await ADSMessage.create(buffer, data.stationId, timestamp)
    }
@@ -142,6 +163,26 @@ function setRequest(userId, deviceId)
 {
    if (!activeUserRequests.has(deviceId)) activeUserRequests.set(deviceId, [])
    activeUserRequests.get(deviceId).push(userId)
+}
+
+const fetchDevice = async (deviceId, authToken) =>
+{
+   const response = await axios.get(`${USER_PROXY}/users/devices/${deviceId}`, {
+      headers: {
+         'Authorization': `Bearer ${authToken}`
+      }
+   })
+
+   return response.data.device
+}
+
+const getAuthToken = async () =>
+{
+   const response = await axios.post(`${AUTH_PROXY}/auth/brokerToken`, {
+      secret: BROKER_SECRET
+   })
+
+   return response.data.accessToken
 }
 
 module.exports = {

@@ -6,7 +6,7 @@
 */
 
 const { verify } = require("jsonwebtoken")
-const { AUTH_CODE_SECRET, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = require("../config")
+const { AUTH_CODE_SECRET, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, BROKER_SECRET } = require("../config")
 const Token = require("../models/Token")
 
 const getScope = async (scope) =>
@@ -88,5 +88,30 @@ exports.verifyRefreshToken = async (req, res, next) =>
    catch (err)
    {
       return res.status(401).json({ message: err.message })
+   }
+}
+
+exports.verifyBrokerSecret = async (req, res, next) =>
+{
+   try
+   {
+      const { secret } = req.body
+
+      if (!secret) return res.status(400).json({ message: "Missing secret" })
+
+      if (BROKER_SECRET !== secret)
+         return res.status(401).json({ message: "Invalid Secret"})
+
+      const { accessExpiry, refreshExpiry } = await getScope("admin")
+
+      req.body = { scope: "admin", accessExpiry, refreshExpiry }
+
+      req.isBroker = true
+
+      next()
+   }
+   catch (err)
+   {
+      return res.status(500).json({ message: err.message })
    }
 }

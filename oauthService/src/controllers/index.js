@@ -35,20 +35,28 @@ exports.generateTokens = async (req, res) =>
 {
    const { userId, scope, accessExpiry, refreshExpiry } = req.body
 
-   const payload = { userId, scope }
+   const payload = req.isBroker
+      ? { service: "broker" }
+      : { userId, scope }
+
    const accessOptions = { expiresIn: accessExpiry }
    const refreshOptions = { expiresIn: refreshExpiry }
 
    try
    {
       const accessToken = await sign(payload, AUTH_TOKEN_SECRET, accessOptions)
-      const refreshToken = await sign(payload, REFRESH_TOKEN_SECRET, refreshOptions)
 
-      const { iat, exp } = await decode(refreshToken, REFRESH_TOKEN_SECRET)
-      const issuedAt = new Date(iat * 1000)
-      const expiresAt = new Date(exp * 1000)
+      let refreshToken = null
+      if (!req.isBroker)
+      {
+         refreshToken = await sign(payload, REFRESH_TOKEN_SECRET, refreshOptions)
 
-      await Token.create(userId, refreshToken, issuedAt, expiresAt)
+         const { iat, exp } = await decode(refreshToken, REFRESH_TOKEN_SECRET)
+         const issuedAt = new Date(iat * 1000)
+         const expiresAt = new Date(exp * 1000)
+
+         await Token.create(userId, refreshToken, issuedAt, expiresAt)
+      }
 
       return res.status(200).json({ accessToken, refreshToken })
    }
