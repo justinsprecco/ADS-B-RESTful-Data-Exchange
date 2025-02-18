@@ -7,6 +7,7 @@ const {
    postDevice,
    getDevices,
    getDevice,
+   findDevice,
    deleteDevice,
    updateDevice,
 } = require("../controllers")
@@ -16,6 +17,8 @@ router.post("/:id/devices", verifyAccessToken, postDevice)
 router.get("/:id/devices", verifyAccessToken, getDevices)
 
 router.get("/:id/devices/:deviceId", verifyAccessToken, getDevice)
+
+router.get("/devices/:macAddress", verifyAccessToken, findDevice)
 
 router.delete("/:id/devices/:deviceId", verifyAccessToken, deleteDevice)
 

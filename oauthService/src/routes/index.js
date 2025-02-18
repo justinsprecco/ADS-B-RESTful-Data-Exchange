@@ -5,7 +5,8 @@ const router = express.Router()
 const {
    verifyScope,
    verifyAuthCode,
-   verifyRefreshToken
+   verifyRefreshToken,
+   verifyBrokerSecret
 } = require('../middleware')
 
 const {
@@ -26,5 +27,8 @@ router.post('/refresh', verifyRefreshToken, refreshAccessToken)
 
 /* URI to verify access */
 router.get('/verify', verifyAccessToken)
+
+/* URI to generate broker token */
+router.post('/brokerToken', verifyBrokerSecret, generateTokens)
 
 module.exports = router
