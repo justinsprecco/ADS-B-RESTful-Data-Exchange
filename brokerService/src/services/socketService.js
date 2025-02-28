@@ -81,7 +81,7 @@ const processStationMessage = async(ws, message)  =>
 
          console.log(`Sending lat/lon: ${latitude}/${longitude}`)
 
-         ws.send(JSON.stringify({ latitude, longitude }))
+         ws.send(`${latitude}:${longitude}`)
       }
 
       catch (error)
