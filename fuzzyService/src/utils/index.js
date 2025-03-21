@@ -1,6 +1,6 @@
 const hexToBin = (message) =>
 {
-   const buffer = Buffer.from(message)
+   const buffer = Buffer.from(message, "hex")
 
    let binMessage = ''
    buffer.forEach(byte => binMessage += byte.toString(2).padStart(8, "0"))
