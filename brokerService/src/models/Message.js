@@ -11,8 +11,10 @@ const messageADSBSchema = new Schema(
    {
       macAddress: { type: String, required: true },
       data: { type: Buffer, required: true },
-      timestamp: { type: Date, required: true }
-   })
+      timestamp: { type: Date, required: true },
+   },
+   { timestamps: true }
+)
 
 messageADSBSchema.statics.create = async function(data, macAddress, timestamp)
 {

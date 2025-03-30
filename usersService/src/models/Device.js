@@ -47,6 +47,13 @@ groundstationSchema.statics.getById = async function(deviceId)
    return { device }
 }
 
+groundstationSchema.statics.getByMac = async function(macAddress)
+{
+   const device = await this.findOne({ macAddress })
+   if (!device) throw new Error("Device not found")
+   return { device }
+}
+
 groundstationSchema.statics.delete = async function(deviceId)
 {
    const session = await startSession()

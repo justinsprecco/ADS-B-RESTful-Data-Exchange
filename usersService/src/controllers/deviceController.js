@@ -68,6 +68,25 @@ exports.getDevice = async (req, res) =>
    }
 }
 
+// get "/users/devices/:macAddress"
+// get device information given a mac address
+exports.findDevice = async (req, res) =>
+{
+   try
+   {
+      const { macAddress } = req.params
+
+      const { device } = await Device.getByMac(macAddress)
+
+      return res.status(200).json({ device })
+   }
+   catch (err)
+   {
+      const status = err.message === "Device not found" ? 404 : 500
+      return res.status(status).json({ message: err.message })
+   }
+}
+
 // delete "/users/:id/devices/:deviceid"
 // delete a device tied to a specific user
 exports.deleteDevice = async (req, res) =>
