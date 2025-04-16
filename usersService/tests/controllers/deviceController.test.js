@@ -84,9 +84,10 @@ describe("GET /users/:id/devices/:deviceId", () =>
 {
    it("should get a device with given id", async () =>
    {
+      User.getById.mockResolvedValue({ user: existingUser })
       Device.getById.mockResolvedValue({ device: newDevice })
 
-      const res = await request(app).get(`/users/1/devices/${newDevice._id}`)
+      const res = await request(app).get(`/users/${newDevice.userId}/devices/${newDevice._id}`)
 
       expect(res.status).toBe(200)
       expect(res.body.device).toStrictEqual(newDevice)

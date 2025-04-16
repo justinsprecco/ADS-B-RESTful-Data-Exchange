@@ -19,7 +19,7 @@ router.all("/auth/*", proxy(AUTH_PROXY))
 // Message Routes
 router.get("/message/ads", getAllADSMessages)
 router.get("/message/ads/latest", getLatestADSMessages)
-router.get("/message/ads/time", getADSMessagesByTime)
+router.post("/message/ads/time", getADSMessagesByTime)
 
 // Stream Routes
 router.post("/users/:id/devices/:deviceid/stream", handleStream)

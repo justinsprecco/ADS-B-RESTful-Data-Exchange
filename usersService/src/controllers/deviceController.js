@@ -53,7 +53,7 @@ exports.getDevice = async (req, res) =>
 {
    try
    {
-      const { userId: id, deviceId } = req.params
+      const { id: userId, deviceId } = req.params
 
       await User.getById(userId)
 
