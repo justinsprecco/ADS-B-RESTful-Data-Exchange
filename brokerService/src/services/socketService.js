@@ -100,7 +100,7 @@ const processStationMessage = async(ws, message)  =>
       if (fuzzyClient) fuzzyClient.send(buffer)
       forwardToUsers(data.stationId, data)
       adminQueue.push(data)
-      const timestamp = new Date(data.timestamp)
+      const timestamp = new Date(data.timestamp * 1000)
       await ADSMessage.create(buffer, ws.stationId, timestamp)
    }
 }
