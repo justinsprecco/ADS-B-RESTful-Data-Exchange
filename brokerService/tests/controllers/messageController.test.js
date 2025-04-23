@@ -2,6 +2,7 @@ const request = require("supertest")
 const app = require("../../src/app")
 const { ADSMessage } = require("../../src/models/Message")
 
+jest.mock('express-http-proxy', () => () => (req, res, next) => next())
 jest.mock("morgan", () => jest.fn(() => (req, res, next) => next()))
 
 // Mock Message model
@@ -66,6 +67,16 @@ describe("GET /message/ads", () =>
       expect(res.body.messages).toStrictEqual(allMessages)
    })
 
+   it("should get all ADS messages within given timeframe", async () =>
+   {
+      ADSMessage.getByTime.mockResolvedValue({ messages: sortedMessages })
+
+      const res = await request(app).get("/message/ads?start=2025-04-01T00:00Z&end=2025-04-01T23:59Z")
+
+      expect(res.status).toBe(200)
+      expect(res.body.messages).toStrictEqual(sortedMessages)
+   })
+
    it("should return an error if messages do not exist", async() =>
    {
       ADSMessage.getAll.mockRejectedValue(new Error("No messages found"))
@@ -87,18 +98,5 @@ describe("GET /message/ads/latest", () =>
 
       expect(res.status).toBe(200)
       expect(res.body.messages).toStrictEqual(latestMessages)
-   })
-})
-
-describe("GET /message/ads/time", () =>
-{
-   it("should get all ADS messages within given timeframe", async () =>
-   {
-      ADSMessage.getByTime.mockResolvedValue({ messages: sortedMessages })
-
-      const res = await request(app).get("/message/ads/time")
-
-      expect(res.status).toBe(200)
-      expect(res.body.messages).toStrictEqual(sortedMessages)
    })
 })

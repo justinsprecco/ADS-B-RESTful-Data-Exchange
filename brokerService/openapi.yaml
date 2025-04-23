@@ -1,0 +1,93 @@
+openapi: 3.1.0
+info:
+  title: Broker Service
+  description: A message retrieval API for the ADS-B RESTful Data Exchange
+  version: 1.0.0
+
+paths:
+  /message/ads:
+    get:
+      summary: Get all messages
+      description: Returns all ADS-B messages, optionally filtered by timestamp range.
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: string
+            format: date-time
+          description: Inclusive start timestamp
+        - in: query
+          name: end
+          schema:
+            type: string
+            format: date-time
+          description: Inclusive end timestamp
+      tags:
+        - Messages
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetMessagesResponse"
+              examples:
+                default:
+                  $ref: "#/components/examples/GetMessagesResponseExample"
+        500:
+          description: Server Error
+
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        _id:
+          description: Unique identifier for a message.
+          type: string
+          format: objectId
+          examples:
+            - 60d2f1f3b3c5e25d12d34abc
+        macAddress:
+          description: The macAddress of the recieving device.
+          type: string
+          examples:
+            - 01:a2:b3:c4:d5:e6
+        data:
+         description: Raw binary buffer, base64-encoded
+         type: string
+         format: byte
+         examples:
+           - "qpFHKh/PmOUAEREECr+yv7K+LSdjHKmgywrTMAbwAAK0wAAAJAAAAAAAAAns="
+        timestamp:
+          description: ISO timestamp of when the message was received.
+          type: string
+          format: date-time
+          examples:
+            - "2025-04-07T16:45:00Z"
+
+    GetMessagesResponse:
+      description: List of all messages.
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+
+  examples:
+    GetMessagesResponseExample:
+      value:
+        messages:
+          - _id: "60d2f1f3b3c5e25d12d34abc"
+            macAddress: "01:a2:b3:c4:d5:e6"
+            data: "qpFHKh/PmOUAEREECr+yv7K+LSdjHKmgywrTMAbwAAK0wAAAJAAAAAAAAAns="
+            timestamp: "2025-04-07T16:45:00Z"
+          - _id: "60d2f1f3b3c5e25d12d34abd"
+            macAddress: "de:ad:be:ef:12:34"
+            data: "YW5vdGhlckV4YW1wbGVCdWZmZXI="
+            timestamp: "2025-04-07T16:46:00Z"
+tags:
+  - name: Messages
+    x-displayName: Message Retrieval
+    description: Retrieve messages in the data exchange.

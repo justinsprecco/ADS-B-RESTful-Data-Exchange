@@ -1,85 +1,116 @@
+# ADS-B RESTful Data Exchange
 
-# Sagetech Capstone Project
+> **WSU Vancouver CS Capstone · 2023 – 2025**  
+> Industry sponsor: **Sagetech Avionics**
 
-Dependencies:
-- Postgres
-- Node.js crypto library
-- Express
-- jsonwebtoken
+A micro‑service platform that **collects, stores, and brokers ADS‑B flight data in real time**.  
+The system is split into purpose‑built services to keep each concern simple and independently deployable.
 
-Authors:
-Joshua Mathwich,
-Janna Tanninen,
-Alexander Flores,
-Satchel Hamilton
-### sponsored by Sagetech Avionics
+## Table of Contents
 
-# Overview
+<!--toc:start-->
 
-The ADSB Exchange System is designed to store and broker ADSB messages in the form of JSON objects, providing a robust solution for real-time aviation data processing. This document outlines how to set up and test the system, including backend hosting on AWS EC2, running a simulator for ADSB messages, and testing the system with a dummy client.
+- [Architecture](#architecture)
+- [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Local Setup](#local-setup)
+- [API Specification](#api-specification)
+- [Testing & Linting](#testing--linting)
+- [Authors](#authors)
 
-# Components
+<!--toc:end-->
 
-- Broker: Facilitates message exchange and manages WebSocket connections.
-- Dummy Client: Simulates user interactions with the system, testing its functionalities.
-- User and Auth Services: Handle user registration, authentication, and device management.
-- Database Setup: Stores ADSB messages, user, and device information.
+<!-- ARCHITECTURE -->
 
-# Setup
+## Architecture
 
-1. AWS EC2 Setup: Deploy the backend components on an AWS EC2 instance. Ensure Node.js is installed and configure security groups to allow necessary inbound connections.
+![Architecture Diagram](./docs/architecture.png)
 
-2. Database Initialization: Run the SQL scripts provided (`adsb_db.sql`, `user_db.sql`, `oauth_db.sql`) to set up the databases.
+| Service | Stack | Purpose |
+|---------|------|---------|
+| **Broker** | Node 20 · Express · WS | Aggregate, process and distribute flight data |
+| **User**   | Node 20 · Express | Account / ground‑station registry |
+| **Auth**   | Node 20 · Express · JWT | OAuth 2 · JWT issuance & refresh |
+| **Fuzzy**  | Node 20 · WS | Detect runway utilisation |
 
-3. Environment Configuration: Set up the `.env` file with database credentials, service ports, and other environment variables.
+> **Docs:** Each service ships a standalone README with API reference, environment keys, and run scripts.  
+>
+> *Broker →* [`/brokerService/README.md`](brokerService/README.md)  
+> *User →* [`/usersService/README.md`](usersService/README.md)  
+> *Auth →* [`/oauthService/README.md`](oauthService/README.md)  
+> *Fuzzy →* [`/fuzzyService/README.md`](fuzzyService/README.md)  
 
-4. Running the Broker: Start the broker component to initiate the WebSocket server and REST API endpoints.
+<!-- QUICK START -->
 
-5. Running the ADSB Simulator: Execute the ADSB message simulator to generate and send messages to the broker for processing.
+## Quick Start
 
-6. Testing with Dummy Client: Use the dummy client to simulate user interactions, such as fetching ADSB messages and testing user and auth functionalities.
+### Prerequisites
 
-Testing the System
+- [Node.js](https://nodejs.org/en/download/) (v20.11.1 or above)
+- [MongoDB](https://www.mongodb.com/try/download/community) (v8.0.4 or above)
 
-1. WebSocket Connection: Test WebSocket connectivity by requesting a connection through the dummy client. Use the `/users/:id/client/connect` endpoint to initiate a connection.
+### Local Setup
+```bash
+# 1. Clone
+git clone https://git.sagetech.com/wsu-captsone/ads-b-restful-data-exchange.git
+cd ads-b-restful-data-exchange
 
-2. ADSB Message Retrieval: Retrieve and display ADSB messages from the database using the dummy client, ensuring the broker correctly processes and stores incoming messages.
+# 2. Install dependencies
+npm run install-all
 
-3. User and Authentication Testing: Utilize the dummy client to test user registration, login, and device registration through the respective URIs detailed in the provided URI document.
+# 3. Configure environment
+# see docs for each service
 
-# Additional Functionalities
-
-- URI Calls: The system supports various operations through specific URIs for user and device management, authentication, and ADSB message streaming. Refer to the "NewURIs-ExternalInternal.docx" for a comprehensive list of available endpoints and their purposes.
-
-Ubuntu EC2 Instance Database Setup
-
-Install postgresql:  sudo apt-get install postgresql
-
-Launch psql: psql
-
-Create database: 
-```
-CREATE DATABASE database;
-```
-```
-CREATE TABLE users
-(
-   id serial PRIMARY KEY,
-   username text UNIQUE,
-   password text,
-   salt text
-) WITH (OIDS = FALSE);
-```
-```
-CREATE TABLE groundstations
-(
-   id serial PRIMARY KEY,
-   user_id int,
-   mac_address text UNIQUE,
-   latitude int,
-   longitude int,
-   FOREIGN KEY(user_id) REFERENCES users(id)
-) WITH (OIDS = FALSE);
+# 4. Launch all services (dev mode, hot‑reload)
+npm run dev
 ```
 
-If issues with user permissions: sudo -u postgres psqlCREATE ROLE 'username' WITH SUPERUSER CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD 'password';
+<!-- TESTING & LINTING -->
+
+## Testing & Linting
+
+Run unit tests for all services:
+```bash
+npm run test
+```
+Lint all JavaScript:
+```bash
+npm run lint
+```
+
+<!-- API SPECIFICATION -->
+
+## API Specification
+
+The Broker service acts as an **API gateway**, forwarding client requests to internal services
+(User, Auth) and exposing public-facing endpoints for data subscriptions and message routing.
+
+You can view the full OpenAPI specification below:
+
+[📄 View OpenAPI Specification](./openapi.yaml)
+
+Each service maintains its own OpenAPI spec. This repository aggregates them:
+
+- [📘 Broker OpenAPI](./brokerService/openapi.yaml)
+- [👤 User OpenAPI](./usersService/openapi.yaml)
+- [🔐 Auth OpenAPI](./oauthService/openapi.yaml)
+
+<!-- AUTHORS -->
+
+## Authors
+
+### 2023-2024 Cohort
+
+- Alexander Flores
+- Satchel Hamilton
+- Joshua Mathwich
+- Janna Tanninen
+
+### 2024-2025 Cohort
+
+- Joe Barteluce
+- Elijah Delavar
+- Matthew Lehner
+- Joey Pandina
+- Nate Shaw
+- Justin Sprecco

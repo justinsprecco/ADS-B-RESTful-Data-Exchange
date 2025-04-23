@@ -1,0 +1,151 @@
+openapi: 3.1.0
+info:
+  title: Auth Service
+  description: An authentication API for the ADS-B RESTful Data Exchange
+  version: 1.0.0
+
+paths:
+  /authCode:
+    post:
+      summary: Generate auth code
+      description: Generates an authentication code to exchange for a token.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenAuthCodeRequest"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenAuthCodeResponse"
+        400:
+          description: Bad Request
+
+  /login:
+    post:
+      summary: Generate Auth tokens
+      description: Generates an authentication and refresh token from a given auth code.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenAuthTokensRequest"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenAuthTokensResponse"
+        400:
+          description: Bad Request
+
+  /refresh:
+    post:
+      summary: Refresh Auth tokens
+      description: Generates an new pair of tokens from a valid refresh token.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokensRequest"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshTokensResponse"
+        400:
+          description: Bad Request
+        401:
+          description: Invalid input
+
+components:
+  schemas:
+    UserId:
+      description: Unique identifier for a user.
+      type: string
+      format: objectId
+      examples:
+        - 60d2f1f3b3c5e25d12d34abc
+    Scope:
+      description: Scope of requesting client
+      type: string
+      examples:
+        - user
+        - admin
+    AuthCode:
+      description: Valid auth code.
+      type: string
+      examples:
+        - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+    AuthToken:
+      description: Authentication token.
+      type: string
+      examples:
+        - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1Njc4OTAiLCJlbWFpbCI6ImV4YW1wbGVAdGVzdC5jb20iLCJpYXQiOjE2MjE4NDgzMzZ9.ZfTuwuP5F7YwKRU8mTq8u0U2FMY1dhKZ2qNzFGgU_7k
+
+    RefreshToken:
+      description: Refresh token.
+      type: string
+      examples:
+        - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJuYW1lIjoiSmFuZSBEb2UiLCJpYXQiOjE2ODAwMDAwMDB9.W7EjD30cE2RtSOMRNYFRe_m0-Yb_VkSIVj7OaWcNxuk
+
+    GenAuthCodeRequest:
+      type: object
+      properties:
+        userId:
+          $ref: "#/components/schemas/UserId"
+        scope:
+          $ref: "#/components/schemas/Scope"
+    GenAuthCodeResponse:
+      type: object
+      properties:
+        authCode:
+          $ref: "#/components/schemas/AuthCode"
+
+    GenAuthTokensRequest:
+      type: object
+      properties:
+        authCode:
+          $ref: "#/components/schemas/AuthCode"
+    GenAuthTokensResponse:
+      type: object
+      properties:
+        authToken:
+          $ref: "#/components/schemas/AuthToken"
+        refreshToken:
+          $ref: "#/components/schemas/RefreshToken"
+
+    RefreshTokensRequest:
+      type: object
+      properties:
+        userId:
+          $ref: "#/components/schemas/UserId"
+        refreshToken:
+          $ref: "#/components/schemas/RefreshToken"
+    RefreshTokensResponse:
+      type: object
+      properties:
+        authToken:
+          $ref: "#/components/schemas/AuthToken"
+        refreshToken:
+          $ref: "#/components/schemas/RefreshToken"
+
+tags:
+  - name: Auth
+    x-displayName: Auth Management
+    description: Manage users in the data exchange.
