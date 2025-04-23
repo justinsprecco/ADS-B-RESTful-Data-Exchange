@@ -8,7 +8,20 @@ paths:
   /message/ads:
     get:
       summary: Get all messages
-      description: Retrieves all ads messages from the database.
+      description: Returns all ADS-B messages, optionally filtered by timestamp range.
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: string
+            format: date-time
+          description: Inclusive start timestamp
+        - in: query
+          name: end
+          schema:
+            type: string
+            format: date-time
+          description: Inclusive end timestamp
       tags:
         - Messages
       responses:
@@ -18,50 +31,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GetMessagesResponse"
-              example:
-                $ref: "#/components/examples/GetMessagesResponseExample"
-        500:
-          description: Server Error
-
-  /message/ads/latest:
-    get:
-      summary: Get latest messages
-      description: Retrieves the 10 latest ads messages from the database.
-      tags:
-        - Messages
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GetMessagesResponse"
-              example:
-                $ref: "#/components/examples/GetMessagesResponseExample"
-        500:
-          description: Server Error
-
-  /message/ads/time:
-    post:
-      summary: Get messages within range
-      description: Retrieves all ads messages within given range from the database.
-      tags:
-        - Messages
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/GetMessagesByTimeRequest"
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GetMessagesResponse"
-              example:
-                $ref: "#/components/examples/GetMessagesResponseExample"
+              examples:
+                default:
+                  $ref: "#/components/examples/GetMessagesResponseExample"
         500:
           description: Server Error
 
@@ -71,63 +43,37 @@ components:
       type: object
       properties:
         _id:
-          $ref: "#/components/schemas/Id"
+          description: Unique identifier for a message.
+          type: string
+          format: objectId
+          examples:
+            - 60d2f1f3b3c5e25d12d34abc
         macAddress:
-          $ref: "#/components/schemas/MacAddress"
+          description: The macAddress of the recieving device.
+          type: string
+          examples:
+            - 01:a2:b3:c4:d5:e6
         data:
-          $ref: "#/components/schemas/Data"
+         description: Raw binary buffer, base64-encoded
+         type: string
+         format: byte
+         examples:
+           - "qpFHKh/PmOUAEREECr+yv7K+LSdjHKmgywrTMAbwAAK0wAAAJAAAAAAAAAns="
         timestamp:
-          $ref: "#/components/schemas/Timestamp"
-
-    Id:
-      description: Unique identifier for a message.
-      type: string
-      format: objectId
-      examples:
-        - 60d2f1f3b3c5e25d12d34abc
-
-    MacAddress:
-      description: The macAddress of the recieving device.
-      type: string
-      examples:
-        - 01:a2:b3:c4:d5:e6
-
-    Data:
-       description: Raw binary buffer, base64-encoded
-       type: string
-       format: byte
-       examples:
-         - "qpFHKh/PmOUAEREECr+yv7K+LSdjHKmgywrTMAbwAAK0wAAAJAAAAAAAAAns="
-                                                                                                                                          
-    Timestamp:
-      description: ISO timestamp of when the message was received.
-      type: string
-      format: date-time
-      examples:
-        - "2025-04-07T16:45:00Z"
+          description: ISO timestamp of when the message was received.
+          type: string
+          format: date-time
+          examples:
+            - "2025-04-07T16:45:00Z"
 
     GetMessagesResponse:
       description: List of all messages.
-      type: array
-      items:
-        $ref: "#/components/schemas/Message"
-
-    GetMessagesByTimeRequest:
-      description: Request payload for message retrieval time range.
+      type: object
       properties:
-        start:
-          type: string
-          format: date-time
-          examples:
-            - "2025-04-07T00:00:00Z"
-        end:
-          type: string
-          format: date-time
-          examples:
-            - "2025-04-07T23:59:59Z"
-      required:
-          - start
-          - end
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
 
   examples:
     GetMessagesResponseExample:
@@ -142,6 +88,6 @@ components:
             data: "YW5vdGhlckV4YW1wbGVCdWZmZXI="
             timestamp: "2025-04-07T16:46:00Z"
 tags:
-  - name: Message
+  - name: Messages
     x-displayName: Message Retrieval
     description: Retrieve messages in the data exchange.

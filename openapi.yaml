@@ -1,8 +1,34 @@
 openapi: 3.1.0
 info:
+  title: ADS-B RESTful Data Exchange
   version: 1.0.0
-  title: ADS-B RESTful Data Exchange API
-  description: An ADS-B RESTful Data Exchange API
   x-logo:
     url: 'https://sagetech.com/wp-content/uploads/2024/07/Sagetech_logo_color_WEBSITE.svg'
     altText: Sagetech logo
+  description: |
+    Unified OpenAPI specification aggregating all microservices:
+    - Broker Service
+    - User Service
+    - Auth Service
+
+paths:
+  /users:
+    $ref: './usersService/openapi.yaml#/paths/~1users'
+  /users/{id}:
+    $ref: './usersService/openapi.yaml#/paths/~1users~1{id}'
+  /users/validate:
+    $ref: './usersService/openapi.yaml#/paths/~1users~1validate'
+  /users/{id}/devices:
+    $ref: './usersService/openapi.yaml#/paths/~1users~1{id}~1devices'
+  /users/{id}/devices/{deviceId}:
+    $ref: './usersService/openapi.yaml#/paths/~1users~1{id}~1devices~1{deviceId}'
+
+  /authCode:
+    $ref: './oauthService/openapi.yaml#/paths/~1authCode'
+  /login:
+    $ref: './oauthService/openapi.yaml#/paths/~1login'
+  /refresh:
+    $ref: './oauthService/openapi.yaml#/paths/~1refresh'
+
+  /message/ads:
+    $ref: './brokerService/openapi.yaml#/paths/~1message~1ads'

@@ -269,7 +269,7 @@ components:
       schema:
         type: string
         examples:
-          - value: 60d2f1f3b3c5e25d12d34abc
+          - 60d2f1f3b3c5e25d12d34abc
     DeviceId:
       name: deviceId
       in: path
@@ -278,7 +278,7 @@ components:
       schema:
         type: string
         examples:
-          - value: 60d2f1f3b3d34dk4l2d0
+          - 60d2f1f3b3d34dk4l2d0
 
   securitySchemes:
     OAuth:
@@ -427,6 +427,7 @@ components:
       description: List of all users.
       type: array
       items:
+        type: object
         properties:
           _id:
             $ref: "#/components/schemas/UserId"
@@ -455,41 +456,38 @@ components:
 
   examples:
     GetUsersResponseExample:
-      value:
-        users:
-          - _id: 60d2f1f3b3c5e25d12d34abc
-            username: user1
-            devices:
-              - 64ef29c25f6e51b89c41a1e3
-              - 64ef29cb2a4f9e314781df62
-              - 64ef29d091e8231c64ab35f7
-          - _id: 60d2f1f3b3c5e25d12d34abd
-            username: user2
-            devices:
-              - 64ef2a18a6d5c8719f32d123
-              - 64ef2a25ad4e3c91c71a4e67
+      users:
+        - _id: 60d2f1f3b3c5e25d12d34abc
+          username: user1
+          devices:
+            - 64ef29c25f6e51b89c41a1e3
+            - 64ef29cb2a4f9e314781df62
+            - 64ef29d091e8231c64ab35f7
+        - _id: 60d2f1f3b3c5e25d12d34abd
+          username: user2
+          devices:
+            - 64ef2a18a6d5c8719f32d123
+            - 64ef2a25ad4e3c91c71a4e67
 
-          - _id: 60d2f1f3b3c5e25d12d34abe
-            username: user3
-            devices:
-              - 64ef2a32e82a6f1b67d42c12
-              - 64ef2a37b9f3d87c91e4d763
-              - 64ef2a3cc5f9a1748b92e864
-              - 64ef2a41e3b6d25f72c34a75
+        - _id: 60d2f1f3b3c5e25d12d34abe
+          username: user3
+          devices:
+            - 64ef2a32e82a6f1b67d42c12
+            - 64ef2a37b9f3d87c91e4d763
+            - 64ef2a3cc5f9a1748b92e864
+            - 64ef2a41e3b6d25f72c34a75
 
     GetUserResponseExample:
-      value:
-        username: user1
-        devices:
-          - 64ef29c25f6e51b89c41a1e3
-          - 64ef29cb2a4f9e314781df62
-          - 64ef29d091e8231c64ab35f7
+      username: user1
+      devices:
+        - 64ef29c25f6e51b89c41a1e3
+        - 64ef29cb2a4f9e314781df62
+        - 64ef29d091e8231c64ab35f7
 
     GetDeviceResponseExample:
-      value:
-        macAddress: 01:a2:b3:c4:d5:e6
-        latitude: 45.731560
-        longitude: -122.636872
+      macAddress: 01:a2:b3:c4:d5:e6
+      latitude: 45.731560
+      longitude: -122.636872
 
 tags:
   - name: Users

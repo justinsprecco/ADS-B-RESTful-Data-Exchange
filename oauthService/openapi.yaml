@@ -79,24 +79,30 @@ components:
       description: Unique identifier for a user.
       type: string
       format: objectId
-      example: 60d2f1f3b3c5e25d12d34abc
+      examples:
+        - 60d2f1f3b3c5e25d12d34abc
     Scope:
       description: Scope of requesting client
       type: string
-      example: user
+      examples:
+        - user
+        - admin
     AuthCode:
       description: Valid auth code.
-      type: jwt
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      type: string
+      examples:
+        - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
     AuthToken:
       description: Authentication token.
-      type: jwt
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1Njc4OTAiLCJlbWFpbCI6ImV4YW1wbGVAdGVzdC5jb20iLCJpYXQiOjE2MjE4NDgzMzZ9.ZfTuwuP5F7YwKRU8mTq8u0U2FMY1dhKZ2qNzFGgU_7k
+      type: string
+      examples:
+        - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1Njc4OTAiLCJlbWFpbCI6ImV4YW1wbGVAdGVzdC5jb20iLCJpYXQiOjE2MjE4NDgzMzZ9.ZfTuwuP5F7YwKRU8mTq8u0U2FMY1dhKZ2qNzFGgU_7k
 
     RefreshToken:
       description: Refresh token.
-      type: jwt
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJuYW1lIjoiSmFuZSBEb2UiLCJpYXQiOjE2ODAwMDAwMDB9.W7EjD30cE2RtSOMRNYFRe_m0-Yb_VkSIVj7OaWcNxuk
+      type: string
+      examples:
+        - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJuYW1lIjoiSmFuZSBEb2UiLCJpYXQiOjE2ODAwMDAwMDB9.W7EjD30cE2RtSOMRNYFRe_m0-Yb_VkSIVj7OaWcNxuk
 
     GenAuthCodeRequest:
       type: object
